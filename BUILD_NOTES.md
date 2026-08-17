@@ -497,3 +497,146 @@ change needed.
   now wrapped with a local `$ErrorActionPreference = "Continue"` (restored
   immediately after) so this harmless stderr chatter no longer aborts the
   script; no check logic was changed.
+
+## Declutter and diagrams
+
+Author brief: reduce visual density, keep every scientific claim/number,
+add three native-TikZ diagrams inside the existing structure (numbered navy
+tabs, three columns, bottom C/E/L row, footer bar, palette all preserved
+unchanged).
+
+### Text cuts (rough word-count deltas, prose+captions only, excludes
+kept theorem-box bodies and kept display equations)
+
+- **Section 1** (about 84 to about 83 words, but one display equation removed and
+  replaced by Diagram A): intro trimmed to one sentence; "Latent identity and
+  non-face view" shortened; the bare Pr(U | Z_1:T) display deleted (its
+  content now shown by Diagram A instead of stated twice); kept the
+  non-face-transform display and the P_guess display as the two required
+  equations.
+- **Section 3** (about 150 to about 149 words plus 3 display equations removed):
+  the three "Additional guarantees" bullets converted from equation-bearing
+  bullets to one-line word-only statements (Ideal additivity, Ablation
+  monotonicity, Plug-in stability) with no display maths in any of the
+  three. Both theorem boxes kept essentially verbatim per instructions.
+  Added Diagram B (anonymity budget) directly under the definition.
+- **Section 7** (about 40 to about 35 words): "Attacker ladder" bullet list
+  (5 items) replaced by Diagram C. Release list (R1 to R4) and Dataset
+  paragraph kept as text, lightly tightened.
+- **Section 8** (about 71 to about 78 words, but 2 of 3 display equations
+  removed): kept the required Delta_corr,2 display; temperature-calibration
+  result and Zipf-prior result now stated inline in prose instead of via
+  standalone displays.
+- **Section 9** (about 153 to about 137 words): trimmed "Not another Re-ID
+  model", "Not a replacement..." and governance/hygiene-box sentences; kept
+  table and hygiene box verbatim in structure; strengthened the
+  anonymization limitation bullet to explicitly say "not realistic
+  detector-based or generative anonymization" (the ethical scope caveat,
+  which is also still present in the section 6 warnbox, so it now appears
+  twice for safety).
+- **Section 10** (about 99 to about 80 words): all three Contribution /
+  Empirical signal / Limitation boxes tightened; heights are fixed
+  (height=3.4in) so the boxes did not shrink, they just gained whitespace,
+  meaning no overflow risk from cutting text in a fixed-height box.
+
+No numeric result, hypothesis (alpha greater than 1, uniform-prior
+conditions), or the ethical scope caveat about detector-based/generative
+anonymization was removed.
+
+### Diagram construction
+
+All three are native TikZ (no pgfplots axes, no rasters), colours drawn
+only from the existing named palette (navy, navy2, royal, green, orange,
+red, lightblue, muted), wrapped in resizebox at a fixed fraction of
+linewidth so they scale to the column without causing overfull boxes.
+
+- **Diagram A (posterior-sharpening strip, section 1).** Four hand-drawn
+  bar panels (a sketchpanel macro, 5 bars each) laid out via a foreach
+  loop with pgfmathsetmacro for bar geometry; the center bar (index 2) is
+  drawn in an escalating highlight colour (navy2 at 28 percent tint for R1,
+  meaning no visible highlight since R1 should read flat, then
+  royal/orange/red for R2/R3/R4) while the other four bars stay a uniform
+  light navy2 tint. Bar heights are source-commented as "ILLUSTRATIVE
+  SKETCHES ONLY (not measured data)" in the .tex file and restated in the
+  on-poster caption. The real numbers printed under each panel are the
+  only numeric claim: R1 A0 P_guess = 0.2883, R2 A0 = 0.7491, R3 A0 =
+  0.7529, R4 A2 = 0.7519, with R4 explicitly labelled "(A2)" under its
+  panel since A0 has no R4 row in the paper (the attacker tag is printed
+  on all four panels, not just R4, for visual consistency).
+- **Diagram B (anonymity budget bar, section 3).** A 4-row stacked
+  horizontal bar (R1 to R4), each row total length equal to log N =
+  ln(751) = about 6.62 nats (Market-1501-tau, N=751, uniform prior,
+  natural log consistent with the paper's exp(...) guessing-bound
+  convention). Filled portion per row = vRPI_2 (colour-ramped
+  navy2/royal/orange/red matching Diagram A and C and the section 4
+  table's red R4 highlight); open portion = remaining H_2(U|Z). The bottom
+  row (R4) is fully annotated with both segment values inside/beside the
+  bar; the top of the stack carries a brace labelled "log N = 6.62 nats
+  (N=751)". Row lengths: R1 filled 3.899 open 2.061, R2 filled 5.591 open
+  0.369, R3 filled 5.334 open 0.626, R4 (A2) filled 5.721 open 0.239 (all
+  in nats). A caption states R1 to R3 use attacker A0, R4 uses A2.
+- **Diagram C (attacker ladder, section 7).** Four ascending rectangles
+  (A0, A1, A3, A4) of increasing height and escalating colour (navy2,
+  royal, orange, red) with an "increasing capability / access" label on
+  top and a one-line capability tag under each box; A2 is drawn as a
+  separate dashed-border box to the right, connected by a dashed line,
+  labelled "(R4 only)" to show it is an artifact-exploiting branch off the
+  general capability ladder rather than a rung on it. The release list (R1
+  to R4) stayed as plain text per instructions; only the attacker list
+  became the diagram.
+
+### Data sources
+
+All values traced to
+Compositional_Non_Face_Re_Identification_Pressure_under_Cumulative_Vision_Releases.tex
+(read-only, authoritative): tab:exp_means for the R1 to R4 P_guess/vRPI_2
+rows (R1/A0 0.2883/4.3319, R2/A0 0.7491/6.2119, R3/A0 0.7529/5.9271,
+R4/A2 0.7519/6.3572); N=751 and the log-base convention (natural log,
+consistent with the exp((1-alpha)/alpha times H_alpha) guessing bound in
+Theorem 2) from the experiments section and the vRPI_alpha definition; log
+N = ln(751) = 6.62 computed directly (not stated verbatim in the paper,
+derived from N=751 under the paper's explicit uniform-prior / log N
+convention).
+
+### Bug caught during self-review
+
+The first pass wrapped Diagram B in a bare "centering" declaration instead
+of a scoped center environment. Because that declaration is unscoped, it
+silently leaked past the diagram into the rest of section 3's content in
+the same group: "Choosing alpha" and "Additional guarantees" rendered
+center-justified instead of left-aligned. This was caught only by zoomed
+rendering, not by build.ps1, which has no way to detect misaligned-but-
+non-overflowing text. Fixed by scoping the diagram and its caption inside
+a center environment; re-rendered to confirm section 3 text is back to
+normal left alignment with only the diagram and its caption centered.
+
+### Before / after visual comparison
+
+Rendered both the pre-edit PDF (from git history) and the final PDF at 35
+DPI full-page, plus each new diagram at 150 DPI. Observed:
+
+- Diagram A reads correctly at a glance: R1's five bars are visibly
+  near-equal height (flat), R2 shows one bar roughly 2x its neighbours, R3
+  roughly 3 to 4x, R4 roughly 8 to 10x, a clear, monotonic flat-to-spiked
+  progression exactly as required, confirmed by direct visual inspection
+  of the 150 DPI crop.
+- Diagram B shows all four bars sharing one baseline and one log N
+  bracket, with the filled portion visibly growing from a short segment
+  (R1) to nearly the full bar (R4); no label collides with the bars or
+  with the row labels to their left.
+- Diagram C's staircase and the dashed A2 side-branch are legible with
+  clear separation from the section box border and from the caption line
+  beneath; the "Attacker ladder." heading sits left of the diagram without
+  overlapping it.
+- Overall density: comparing the two full-page renders side by side,
+  columns 1 and 3 (sections 1/2/3 and 7/8/9) visibly gained open
+  whitespace below section 3 and below section 9 that the pre-edit version
+  did not have. The pre-edit column ran text almost to the section-box
+  borders with little vertical breathing room; the post-edit column has
+  clearly more air around each block, and the wall of stacked display
+  equations in sections 1, 3, and 8 is broken up by the three new
+  graphics. No text collides with any box border, table, or the other new
+  diagrams; no Overfull hbox/vbox was reported by build.ps1 (re-run clean,
+  exit 0, all checks green including MediaBox/TrimBox/BleedBox geometry,
+  crop marks at all four corners, embedded and subsetted fonts, zero RGB
+  paint operators, and Katz logo DPI).

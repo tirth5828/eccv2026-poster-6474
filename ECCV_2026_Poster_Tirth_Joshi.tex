@@ -130,27 +130,57 @@
 
 \begin{sectionbox}{1. Why Single-Release Privacy Is the Wrong Unit}
 \smallbody
-Most vision privacy evaluations inspect a dataset or model \emph{in isolation}. Real ecosystems publish artifacts sequentially: more data, new checkpoints/APIs, embeddings, retrieval indices, and sometimes metadata.
+Vision privacy evaluations usually inspect one release in isolation. Real ecosystems publish artifacts sequentially: data, checkpoints, embeddings, indices, sometimes metadata.
 
-\vspace{0.0476in}
-\mhead{Latent identity and non-face view.}
-Let $U\in\{1,\dots,N\}$ index identity, $X$ be a raw observation, and
+\vspace{0.0397in}
+\mhead{Latent identity.} Let $U\in\{1,\dots,N\}$ index identity and $X$ be a raw observation. The non-face transform
 \[
 \widetilde X=\tau(X)
 \]
-be a non-face transformation. Identity can still remain in clothing, body shape, pose/gait, carried objects, and scene context.
+removes faces, but identity remains in clothing, gait, and scene context.
 
-\vspace{0.0317in}
-\mhead{The compositional question.}
-Instead of asking whether one release leaks identity, ask how the posterior
-\[
-\Pr(U\mid Z_{1:T})
-\]
-sharpens as releases accumulate. The operational target is Bayes-optimal guessing:
+\vspace{0.0238in}
+\mhead{The compositional question.} Does the posterior $\Pr(U\mid Z_{1:T})$ sharpen as releases accumulate? The operational target is Bayes-optimal guessing:
 \[
 P_{\mathrm{guess}}(U\mid Z_{1:T})
 =\mathbb E\!\left[\max_u \Pr(U=u\mid Z_{1:T})\right].
 \]
+
+\vspace{0.0317in}
+\centering
+\resizebox{0.6\linewidth}{!}{%
+\begin{tikzpicture}[x=1in,y=1in]
+% Diagram A: posterior-sharpening strip. Bar heights are ILLUSTRATIVE
+% SKETCHES ONLY (not measured data) -- they show the qualitative flat ->
+% spiked shape of Pr(U|Z_{1:t}) across releases. The real measured
+% P_guess values are printed under each panel (paper tab:exp_means;
+% R1-R3 use attacker A0, R4 uses attacker A2 since A0 has no R4 row).
+\def\barw{0.5}
+\def\step{0.62}
+\def\maxh{1.9}
+\newcommand{\sketchpanel}[6]{%
+  \begin{scope}[xshift=#1in]
+    \draw[color=muted, line width=0.6pt] (-0.10,0) -- ({4*\step+\barw+0.10},0);
+    \foreach \h [count=\i from 0] in {#2} {
+      \pgfmathsetmacro{\bx}{\i*\step}
+      \pgfmathsetmacro{\bh}{\h*\maxh}
+      \ifnum\i=2
+        \draw[fill=#3, draw=navy, line width=0.6pt] (\bx,0) rectangle ({\bx+\barw},\bh);
+      \else
+        \draw[fill=navy2!28, draw=navy2, line width=0.4pt] (\bx,0) rectangle ({\bx+\barw},\bh);
+      \fi
+    }
+    \node[font=\fontsize{23.328}{27}\bfseries\selectfont, color=navy] at ({2*\step+\barw/2},{\maxh+0.32}) {#4};
+    \node[font=\tinybody, align=center] at ({2*\step+\barw/2},-0.42) {$P_{\mathrm{guess}}=#5$\\\textcolor{muted}{(#6)}};
+  \end{scope}
+}
+\sketchpanel{0.00}{0.85,0.95,1.0,0.9,0.8}{navy2!28}{R1}{0.2883}{A0}
+\sketchpanel{3.55}{0.5,0.4,1.0,0.45,0.35}{royal}{R2}{0.7491}{A0}
+\sketchpanel{7.10}{0.3,0.25,1.0,0.3,0.2}{orange}{R3}{0.7529}{A0}
+\sketchpanel{10.65}{0.15,0.1,1.0,0.12,0.1}{red}{R4}{0.7519}{A2}
+\end{tikzpicture}}
+
+{\captionfont Sketch of $\Pr(U\mid Z_{1:t})$ concentrating across releases -- bars are illustrative, not measured. Measured $P_{\mathrm{guess}}$ is printed below each panel (Table, \S4).}
 \end{sectionbox}
 
 \vspace{0.1904in}
@@ -180,9 +210,37 @@ P_{\mathrm{guess}}(U\mid Z_{1:T})
 \[
 \boxed{vRPI_\alpha(T)=\log N-H_\alpha(U\mid Z_{1:T})}.
 \]
-For a uniform prior, $\log N$ is maximal identity uncertainty, so $vRPI_\alpha$ measures how much anonymity has been eroded by cumulative releases.
+Under a uniform prior, $\log N$ is maximal identity uncertainty: $vRPI_\alpha$ is the anonymity already eroded by cumulative releases.
 
-\vspace{0.0476in}
+\vspace{0.0317in}
+\begin{center}
+\resizebox{0.42\linewidth}{!}{%
+\begin{tikzpicture}[x=1in,y=1in]
+% Diagram B: anonymity budget bar. Total row length = log N (uniform
+% prior, N=751 Market-1501-tau identities), log N = ln(751) = 6.62 nats.
+% Filled = eroded vRPI_2; open = remaining H_2(U|Z_{1:T}). R1-R3 use
+% attacker A0; R4 uses A2 (paper tab:exp_means: vRPI_2 = 4.3319, 6.2119,
+% 5.9271, 6.3572; remaining H_2 for R4 = 6.62-6.3572 = 0.26).
+\def\total{5.96}
+\def\rh{0.42}
+\def\rg{0.16}
+\draw[decorate,decoration={brace,amplitude=5pt},line width=0.7pt,color=muted] (0,{4*(\rh+\rg)-\rg+0.16}) -- (\total,{4*(\rh+\rg)-\rg+0.16});
+\node[font=\smallbody,color=muted] at ({\total/2},{4*(\rh+\rg)-\rg+0.5}) {$\log N=6.62$ nats\ \ ($N{=}751$)};
+\foreach \r/\flen/\col/\lbl in {0/3.899/navy2/R1,1/5.591/royal/R2,2/5.334/orange/R3,3/5.721/red/R4}{
+  \pgfmathsetmacro{\y}{(3-\r)*(\rh+\rg)}
+  \draw[fill=\col,draw=navy,line width=0.6pt] (0,\y) rectangle (\flen,{\y+\rh});
+  \draw[draw=navy,line width=0.6pt] (\flen,\y) rectangle (\total,{\y+\rh});
+  \node[font=\smallbody\bfseries,color=navy,anchor=east] at (-0.15,{\y+\rh/2}) {\lbl};
+}
+\node[font=\tinybody,color=white,anchor=east] at (5.60,{0+\rh/2}) {$vRPI_2{=}6.36$};
+\node[font=\tinybody,color=navy,anchor=west] at ({\total+0.15},{0+\rh/2}) {$H_2{=}0.26$};
+\node[font=\tinybody,color=navy,align=center] at (2.98,-0.32) {filled = eroded anonymity \quad open = remaining};
+\end{tikzpicture}}
+
+{\captionfont Rows R1--R4: filled = eroded $vRPI_2$ (R4 uses attacker A2, others A0); open = remaining $H_2(U\mid Z_{1:T})$. Nats, $N=751$.}
+\end{center}
+
+\vspace{0.0317in}
 \begin{tcolorbox}[colback=lightblue,colframe=navy2,left=0.12in,right=0.12in,top=0.084in,bottom=0.084in]
 \textbf{Theorem 1: monotonicity on the true posterior}
 \[
@@ -207,18 +265,12 @@ Thus higher pressure corresponds to a smaller effective anonymity set and strong
 \vspace{0.0317in}
 \mhead{Choosing $\alpha$.} $\alpha=2$ is the recommended stable default; $\alpha=5$ or $10$ emphasizes high-confidence / worst-case posterior concentration and should be paired with calibration diagnostics.
 
-\vspace{0.0635in}
+\vspace{0.0476in}
 \mhead{Additional guarantees.}
 \begin{itemize}
-  \item \textbf{Ideal additivity benchmark.} If releases are conditionally independent given identity, Sibson information factorizes and gives an additive upper benchmark on pressure:
-  \[
-  vRPI_\alpha(T)\le \sum_{t=1}^{T} I^{\mathrm S}_\alpha(U;Z_t).
-  \]
-  \item \textbf{Ablation monotonicity.} If $\tau_B$ is a post-processing of $\tau_A$, then removing information cannot increase pressure:
-  \[
-  vRPI_\alpha^A(T)\ge vRPI_\alpha^B(T).
-  \]
-  \item \textbf{Plug-in stability.} If the estimated posterior is close in expected $\ell_1$ error, the estimated $vRPI_\alpha$ changes continuously, with an explicit logarithmic error bound.
+  \item \textbf{Ideal additivity benchmark:} under conditional independence given identity, Sibson information factorizes into an additive upper bound on pressure across releases.
+  \item \textbf{Ablation monotonicity:} post-processing that removes information cannot increase measured pressure.
+  \item \textbf{Plug-in stability:} pressure estimated from an approximate posterior changes continuously, with an explicit logarithmic error bound.
 \end{itemize}
 \end{sectionbox}
 \end{minipage}\hfill
@@ -304,14 +356,32 @@ R4 & A0-Graph & .7366 & 5.6697 & kNN-graph pathway\\
 
 \vspace{0.0317in}
 \mhead{Attacker ladder.}
-\begin{itemize}
-  \item \textbf{A0} black-box retrieval with identity-level posterior aggregation.
-  \item \textbf{A1} linear probe.
-  \item \textbf{A2} prototype-index specialist (R4).
-  \item \textbf{A3} MLP / nonlinear probe.
-  \item \textbf{A4} white-box fine-tuning (R1--R3).
-\end{itemize}
-Every attacker maps scores into a posterior over the same identity universe before entropy computation.
+\centering
+\resizebox{0.78\linewidth}{!}{%
+\begin{tikzpicture}[x=1in,y=1in]
+% Diagram C: attacker capability ladder. Ascending steps = increasing
+% attacker capability/access (paper sec:experiments attacker list). A2 is
+% drawn as a separate, dashed, R4-only branch because it exploits a
+% released artifact (prototype bank / kNN graph) rather than sitting on
+% the general capability ladder.
+\node[font=\tinybody, color=muted] at (3.67,1.55) {\textbf{increasing capability / access} $\longrightarrow$};
+\draw[fill=navy2, draw=navy, line width=0.7pt] (0.00,0) rectangle (1.70,0.40);
+\draw[fill=royal, draw=navy, line width=0.7pt] (1.88,0) rectangle (3.58,0.62);
+\draw[fill=orange,draw=navy, line width=0.7pt] (3.76,0) rectangle (5.46,0.85);
+\draw[fill=red,   draw=navy, line width=0.7pt] (5.64,0) rectangle (7.34,1.10);
+\node[font=\bodyfont\bfseries, color=white] at (0.85,0.20) {A0};
+\node[font=\bodyfont\bfseries, color=white] at (2.73,0.31) {A1};
+\node[font=\bodyfont\bfseries, color=white] at (4.61,0.43) {A3};
+\node[font=\bodyfont\bfseries, color=white] at (6.49,0.55) {A4};
+\node[font=\tinybody, color=navy, align=center] at (0.85,-0.28) {black-box\\retrieval};
+\node[font=\tinybody, color=navy, align=center] at (2.73,-0.28) {linear\\probe};
+\node[font=\tinybody, color=navy, align=center] at (4.61,-0.28) {nonlinear\\probe (MLP)};
+\node[font=\tinybody, color=navy, align=center] at (6.49,-0.28) {white-box\\fine-tune};
+\node[draw=navy, dashed, line width=0.9pt, fill=lightblue, rounded corners=3pt, align=center, font=\tinybody, text width=1.9in, minimum height=1.1in] (a2) at (9.35,0.55) {\textbf{A2}\\prototype-index specialist\\\emph{(R4 only)}};
+\draw[dashed,color=navy2,line width=0.7pt] (7.34,0.55) -- (a2.west);
+\end{tikzpicture}}
+
+{\captionfont Every attacker maps scores into a posterior over the same identity universe before entropy computation.}
 \end{sectionbox}
 
 \vspace{0.1904in}
@@ -327,33 +397,23 @@ Every attacker maps scores into a posterior over the same identity universe befo
 quantifying redundancy among correlated release channels.
 
 \vspace{0.0476in}
-\mhead{Temperature calibration.} Across $\theta\in\{.025,.05,.1,.2,.5,1.0\}$, absolute pressure changes, but
-\[
-\Delta vRPI_2(R2-R1)>0
-\]
-throughout: A0 spans $[.781,4.100]$ and A3 $[.567,.677]$.
+\mhead{Temperature calibration.} Across $\theta\in\{.025,.05,.1,.2,.5,1.0\}$, absolute pressure shifts but $\Delta vRPI_2(R2\!-\!R1)$ stays positive throughout: A0 spans $[.781,4.100]$, A3 spans $[.567,.677]$.
 
 \vspace{0.0476in}
-\mhead{Non-uniform identity priors.} For a Zipf$(s)$ prior, normalize by prior entropy:
-\[
-vRPI_\alpha^{\pi}(T)
-=H_\alpha(U)-H_\alpha(U\mid Z_{1:T}).
-\]
-The R1$\rightarrow$R2 increment shrinks from $3.818$ at $s=0$ to $.123$ at $s=1.5$, because a concentrated prior leaves less anonymity to erode.
+\mhead{Non-uniform identity priors.} For a Zipf$(s)$ prior, normalizing by prior entropy instead of $\log N$, the R1$\rightarrow$R2 increment shrinks from $3.818$ at $s=0$ to $.123$ at $s=1.5$: a concentrated prior leaves less anonymity to erode.
 \end{sectionbox}
 
 \vspace{0.1904in}
 \begin{sectionbox}{9. What the Framework Adds}
 \smallbody
-\mhead{Not another Re-ID model.} $vRPI_\alpha$ audits the privacy pressure induced by releases; rank/mAP remains a retrieval-utility metric. The two answer different questions.
+\mhead{Not another Re-ID model.} $vRPI_\alpha$ audits release-induced privacy pressure; rank/mAP remains a retrieval-utility metric -- different questions.
 
 \vspace{0.0476in}
-\mhead{Not a replacement for maximal leakage or DP.} Maximal leakage optimizes adversarial gain at the channel level, while DP supplies worst-case stability guarantees. $vRPI_\alpha$ instead fixes the vision identity task and measures posterior concentration over a release sequence.
+\mhead{Not a replacement for maximal leakage or DP.} Maximal leakage optimizes adversarial gain per channel; DP gives worst-case stability guarantees. $vRPI_\alpha$ fixes the identity task and measures posterior concentration over a release sequence.
 
 \vspace{0.0476in}
-\mhead{Governance implication.} Privacy review should happen at the \textbf{sequence level}: evaluate planned dataset/model/index disclosures together, minimize unnecessary metadata, and treat high-leverage artifacts such as embedding dumps, prototype banks, and indices as privacy-relevant releases.
+\mhead{Governance implication.} Privacy review should happen at the \textbf{sequence level}: evaluate planned disclosures together, minimize unnecessary metadata, and treat embedding dumps, prototype banks, and indices as privacy-relevant releases.
 
-\vspace{0.0476in}
 \vspace{0.0476in}
 \mhead{Positioning against common criteria.}\par
 \tablefont
@@ -374,14 +434,14 @@ DP / attribute inference & Worst-case stability / bound & Via composition\\
 \vspace{0.0635in}
 \begin{tcolorbox}[colback=softgreen,colframe=green,left=0.12in,right=0.12in,top=0.084in,bottom=0.084in]
 \smallbody
-\textbf{Release hygiene, not surveillance.} The intended use is governance: audit successive disclosures before publication, limit high-leverage artifacts, and minimize unnecessary metadata exposure.
+\textbf{Release hygiene, not surveillance.} Intended use is governance: audit successive disclosures before publication, limit high-leverage artifacts, minimize unnecessary metadata.
 \end{tcolorbox}
 
 \vspace{0.0476in}
 \mhead{Limitations.}
 \begin{itemize}
   \item Closed-world image benchmarks; broader datasets, video, larger scale, and open-set evaluation remain future work.
-  \item Top-region masking is a controlled proxy rather than realistic anonymization.
+  \item Top-region masking is a controlled proxy, not realistic detector-based or generative anonymization.
   \item $vRPI_\alpha$ is an audit statistic, not a mitigation method.
 \end{itemize}
 \end{sectionbox}
@@ -394,24 +454,24 @@ DP / attribute inference & Worst-case stability / bound & Via composition\\
 \begin{tcolorbox}[height=3.4in,colback=lightblue,colframe=navy2,left=0.168in,right=0.168in,top=0.144in,bottom=0.12in]
 {\fontsize{39.96}{47.52}\bfseries\color{navy}Contribution}\par\vspace{0.1495in}
 {\fontsize{29.7}{36.18}\selectfont
-A \textbf{release-sequence privacy formalism} and $vRPI_\alpha$, derived from Arimoto conditional Rényi entropy.\par\vspace{0.253in}
-\textbf{Theory:} monotonicity under added side information, a Bayes-guessing bridge, an ideal additive benchmark, ablation monotonicity, and plug-in stability.}
+A \textbf{release-sequence privacy formalism}, $vRPI_\alpha$, from Arimoto conditional Rényi entropy.\par\vspace{0.253in}
+\textbf{Theory:} monotonicity under added side information, a Bayes-guessing bridge, an additive benchmark, ablation monotonicity, and plug-in stability.}
 \end{tcolorbox}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.318\linewidth}
 \begin{tcolorbox}[height=3.4in,colback=softgreen,colframe=green,left=0.168in,right=0.168in,top=0.144in,bottom=0.12in]
 {\fontsize{39.96}{47.52}\bfseries\color{navy}Empirical signal}\par\vspace{0.1495in}
 {\fontsize{29.7}{36.18}\selectfont
-On face-masked Market-1501, \textbf{exposure expansion causes the dominant jump}: A0 $P_{\mathrm{guess}}$ rises .288$\rightarrow$.749 and $vRPI_2$ rises 4.332$\rightarrow$6.212.\par\vspace{0.253in}
-CUHK03 preserves the paired R1$\rightarrow$R2 direction, while prototype/index and kNN-graph releases create artifact-specific leakage pathways.}
+On face-masked Market-1501, \textbf{exposure expansion dominates}: A0 $P_{\mathrm{guess}}$ .288$\rightarrow$.749, $vRPI_2$ 4.332$\rightarrow$6.212.\par\vspace{0.253in}
+CUHK03 preserves the paired R1$\rightarrow$R2 direction; prototype/index and kNN-graph releases add artifact-specific leakage.}
 \end{tcolorbox}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.318\linewidth}
 \begin{tcolorbox}[height=3.4in,colback=softorange,colframe=orange,left=0.168in,right=0.168in,top=0.144in,bottom=0.12in]
 {\fontsize{39.96}{47.52}\bfseries\color{navy}Limitation}\par\vspace{0.1495in}
 {\fontsize{29.7}{36.18}\selectfont
-The evaluation is intentionally theory-aligned and closed-world. $vRPI_\alpha$ is an \textbf{audit statistic, not a mitigation}.\par\vspace{0.253in}
-Next: \textbf{open-set posteriors, realistic anonymizers, more datasets/video, and longer real release sequences} that better match evolving benchmark ecosystems.}
+Evaluation is theory-aligned and closed-world. $vRPI_\alpha$ is an \textbf{audit statistic, not a mitigation}.\par\vspace{0.253in}
+Next: \textbf{open-set posteriors, realistic anonymizers, more datasets/video, and longer real release sequences.}}
 \end{tcolorbox}
 \end{minipage}
 \end{sectionbox}
