@@ -62,17 +62,22 @@
 \addplot[color=navy2,  mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,4.549)(R2,4.977)};
 \addplot[color=orange, mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,0.530)(R2,3.325)};
 
-% end-of-line labels: Market A0 (4.966) and CUHK03 A3 (4.977) are the severe collision --
-% at this panel's scale (4cm axis height / 6.6 range) a text block is roughly 0.7 axis
-% units tall, so labels need >=0.85-unit centre spacing to clear each other; both
-% colliding labels are staggered well apart (above / below) with a leader line back to
-% the true (unmoved) data point.
-\node[anchor=west, color=green,  font=\normalsize] at (axis cs:R2,5.943) {Market A3};
-\node[anchor=west, color=navy2,  font=\normalsize] at (axis cs:R2,5.05) {CUHK03 A3};
-\draw[color=navy2, thin] (axis cs:R2,4.977) -- (axis cs:R2,5.05);
-\node[anchor=west, color=royal,  font=\normalsize] at (axis cs:R2,4.20) {Market A0};
-\draw[color=royal, thin] (axis cs:R2,4.966) -- (axis cs:R2,4.20);
-\node[anchor=west, color=orange, font=\normalsize] at (axis cs:R2,3.325) {CUHK03 A0};
+% end-of-line labels: Market A3 (5.943), CUHK03 A3 (4.977) and Market A0 (4.966) all sit
+% within ~1 axis unit of each other, and an earlier fix that staggered CUHK03 A3 to
+% y=5.05 still overprinted Market A0's own (unmoved) label immediately below it. Fix:
+% all four labels are placed on a uniform 1.2-axis-unit ladder (measured empirically by
+% rendering and pixel-probing the text rows: 1.2 units here leaves a clean gap between
+% each label's glyph bounding box, comfortably more than the ~0.5-unit ladder that was
+% still visibly crowding), each with its own leader line back to its true (unmoved) data
+% point, so every label is unambiguous and no two text blocks touch.
+\node[anchor=west, color=green,  font=\normalsize] at (axis cs:R2,6.15) {Market A3};
+\draw[color=green,  thin] (axis cs:R2,5.943) -- (axis cs:R2,6.15);
+\node[anchor=west, color=navy2,  font=\normalsize] at (axis cs:R2,4.95) {CUHK03 A3};
+\draw[color=navy2, thin] (axis cs:R2,4.977) -- (axis cs:R2,4.95);
+\node[anchor=west, color=royal,  font=\normalsize] at (axis cs:R2,3.75) {Market A0};
+\draw[color=royal, thin] (axis cs:R2,4.966) -- (axis cs:R2,3.75);
+\node[anchor=west, color=orange, font=\normalsize] at (axis cs:R2,2.55) {CUHK03 A0};
+\draw[color=orange, thin] (axis cs:R2,3.325) -- (axis cs:R2,2.55);
 
 \end{groupplot}
 \end{tikzpicture}

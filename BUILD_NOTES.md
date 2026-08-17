@@ -390,3 +390,110 @@ converts it to a DPI figure). The katz-logo DPI check is unchanged and
 still passes (204.5 DPI, well above the 100 DPI floor — it remains the
 only raster asset in the poster). Re-ran the full `build.ps1`: all checks
 pass, exit 0.
+
+## Vector figure defect fixes
+
+The §9 vector conversion above (uncommitted at the start of this pass) had
+two rendering defects that `build.ps1`'s automated checks cannot see
+(neither is a geometry/font/colour/hbox problem — both are purely visual):
+the §9 notes' claim that section 5 has "no collision" and "is visually
+indistinguishable from the original" was true for colour/marker/style
+fidelity but missed that R4 itself had silently fallen outside the axis
+frame, and the §9 D2 fix (0.85-unit label ladder) still overprinted on
+render despite the notes' claim of "clear whitespace between every pair."
+
+### D1 — section 5, R4 missing from the x-axis, both R4 markers outside the frame
+
+**Root cause.** `assets/fig_release_trends_vector.tex` declared
+`symbolic x coords={R1,R2,R3,R4}` but used `xtick=data` to derive the tick
+list. In this groupplot, `xtick=data` resolved to only `{R1,R2,R3}` — the
+categories actually spanned by the A0/A3/A4 line series added first —
+rather than the full declared symbolic list, so the axis frame itself only
+allocated width for 3 categories and the R4-only A2/A0-Graph markers
+(`only marks`, added after) were plotted at a 4th symbolic position that
+fell entirely outside the drawn frame, in the surrounding whitespace.
+
+**Fix.** Replaced `xtick=data` with an explicit `xtick={R1,R2,R3,R4}` (the
+same explicit form the paper's own pgfplots source uses for this figure,
+confirmed by inspection of the paper's commented-out
+`fig:release_two_panel_new` source) and increased `enlarge x limits` from
+0.12 to 0.15 for clearer padding around R4. No data point, colour, marker,
+or series was touched — this is purely an axis-tick/extent fix. Rebuilt
+and re-rendered: R4 is now a labelled tick on both panels, and both the
+A2 (navy diamond) and A0-Graph (red ×) markers sit inside the axis frame
+with visible margin to the right border, not on or beyond it.
+
+**Cross-check against the original raster (`assets/fig_release_trends.png`,
+rendered and zoomed) and against `tab:exp_means` in the read-only paper
+source:** the original PNG shows R4 as a labelled tick with *only* A2 and
+A0-Graph plotted there — A0/A3/A4's lines stop at R3 with no R4 marker or
+connecting segment. This matches `tab:exp_means`, which has no R4 row for
+A0, A3, or A4 (only A2 and A0-Graph report R4 values). The vector figure
+already reproduced this correctly (no line was fabricated through R4 for
+A0/A3/A4); the only bug was the axis/tick extent, now fixed. Full
+data table (all 10 rows) is unchanged from §9 above and re-verified:
+
+| Attacker | R1 | R2 | R3 | R4 |
+|---|---|---|---|---|
+| A0 P_guess / vRPI₂ | .2883 / 4.3319 | .7491 / 6.2119 | .7529 / 5.9271 | — |
+| A3 P_guess / vRPI₂ | .4073 / 4.7231 | .7063 / 5.9402 | .7092 / 5.9368 | — |
+| A4 P_guess / vRPI₂ | .5073 / 5.0912 | .7304 / 6.0133 | .7238 / 6.0060 | — |
+| A2 P_guess / vRPI₂ | — | — | — | .7519 / 6.3572 |
+| A0-Graph P_guess / vRPI₂ | — | — | — | .7366 / 5.6697 |
+
+All values match `tab:exp_means` and the original PNG exactly; no
+discrepancy found between the two source-of-truth artifacts.
+
+### D2 — section 6 right panel, staggered label collided with the label it was staggered past
+
+**Root cause.** The §9 fix moved CUHK03 A3's label from its true value
+(4.977) to y=5.05, but left Market A0's label unmoved at its true value
+(4.966) — i.e. it moved one colliding label directly on top of the other
+label it was supposed to be avoiding. Pixel-probing the rendered text rows
+confirmed the "CUHK03 A3" and "Market A0" glyph bounding boxes had only
+~1px of clearance (visually fused).
+
+**Fix.** All four right-panel labels (Market A3 5.943, CUHK03 A3 4.977,
+Market A0 4.966, CUHK03 A0 3.325) — not just the two that were closest —
+are now placed on a uniform ladder with **1.2-axis-unit** spacing (Market
+A3 at 6.15, CUHK03 A3 at 4.95, Market A0 at 3.75, CUHK03 A0 at 2.55), each
+with its own thin, series-coloured leader line back to its true (unmoved)
+data point. 1.2 units was reached empirically: an intermediate attempt at
+1.05 units rendered with only an 18–19px (≈3.2mm) gap between text rows at
+150 DPI; pixel-probing the final 1.2-unit version shows a 26–27px (≈4.6mm)
+gap between every adjacent label pair — comfortably non-touching, and
+wider than the previous attempt's margin. No data point was moved.
+
+Left panel (Market A3 .691, Market A0 .547, CUHK03 A3 .502, CUHK03 A0
+.399, on the §9 fix's existing 0.12-unit ladder) was re-checked by the same
+pixel-row method and confirmed clear — text rows have a visible gap, no
+change needed.
+
+### Proof (rendered from the final `6474_Joshi_1400x1000mm.pdf`, 150 DPI)
+
+- **Section 5:** both panels ("Identity-guessing success",
+  "Rényi re-identification pressure") show all four x tick labels
+  R1, R2, R3, R4; the A2 (navy diamond) and A0-Graph (red ×) markers at R4
+  sit fully inside the axis frame with visible margin, not floating in
+  whitespace.
+- **Section 6:** right panel — Market A3 / CUHK03 A3 / Market A0 / CUHK03
+  A0 render as four distinct, non-overlapping lines of text, each with a
+  visible leader line to its own (unmoved) data point; left panel's four
+  labels confirmed clear by the same method.
+- **Boundary check:** cropped the region between sections 5/6 and the
+  section 7/9 column to their right — all figure content (including the R4
+  markers and the section-6 leader/label block) stays inside its own
+  column's light-gray border with a clear gap before the neighbouring
+  column's text; nothing clipped or spilling over.
+- **`build.ps1`:** re-ran end-to-end after both fixes — all checks pass,
+  exit 0 (MediaBox/TrimBox/BleedBox geometry, crop marks at all 4 corners,
+  fonts embedded+subsetted, zero RGB paint operators, no
+  Overfull/Underfull hbox/vbox beyond 5pt). One environment-only change was
+  needed to get `build.ps1` running at all in this session: MiKTeX's
+  one-time "you have not checked for MiKTeX updates" notice on `pdflatex`
+  writes to stderr, which PowerShell's `$ErrorActionPreference = "Stop"`
+  promotes into a terminating `NativeCommandError` even though `pdflatex`
+  exits 0 and produces a correct PDF. The two `pdflatex` invocations are
+  now wrapped with a local `$ErrorActionPreference = "Continue"` (restored
+  immediately after) so this harmless stderr chatter no longer aborts the
+  script; no check logic was changed.

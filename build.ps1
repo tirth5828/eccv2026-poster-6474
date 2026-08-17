@@ -37,9 +37,17 @@ function Pass([string]$msg) {
 # 1. Compile twice
 # ---------------------------------------------------------------------------
 Write-Host "== pdflatex pass 1/2 ==" -ForegroundColor Cyan
-& $PdfLatex -interaction=nonstopmode --enable-installer $TexFile | Out-File -Encoding utf8 "build_pass1.log"
+# pdflatex writes a harmless "you have not checked for MiKTeX updates" notice to
+# stderr on this machine; under $ErrorActionPreference=Stop that non-terminating
+# native-command stderr gets promoted into a terminating error even though
+# pdflatex exits 0 and the PDF is produced fine. Relax to Continue only around
+# the two pdflatex invocations so that chatter doesn't abort the build.
+$prevEAP = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+& $PdfLatex -interaction=nonstopmode --enable-installer $TexFile 2>&1 | Out-File -Encoding utf8 "build_pass1.log"
 Write-Host "== pdflatex pass 2/2 ==" -ForegroundColor Cyan
-& $PdfLatex -interaction=nonstopmode --enable-installer $TexFile | Out-File -Encoding utf8 "build_pass2.log"
+& $PdfLatex -interaction=nonstopmode --enable-installer $TexFile 2>&1 | Out-File -Encoding utf8 "build_pass2.log"
+$ErrorActionPreference = $prevEAP
 
 if (-not (Test-Path $PdfFile)) {
     Fail "PDF was not produced by pdflatex"
