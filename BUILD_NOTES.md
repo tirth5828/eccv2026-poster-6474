@@ -216,3 +216,177 @@ ink present in a small pixel window at all 4 corners; minimum text size
 reported/flagged), and only copies the result to
 `6474_Joshi_1400x1000mm.pdf` if every check passes — otherwise it prints
 `FAIL:` lines for each failing check and exits non-zero.
+
+(§9 below supersedes the DPI check for the two figures — they are now
+vector — while the logo DPI check is unchanged.)
+
+## 9. Vector figure regeneration
+
+**Why.** `assets/fig_replication.png` (section 6, "Replication + Non-Face
+Stress Test") had a baked-in label collision: at R2 in the right panel
+("Pressure rises on both datasets") the end-of-line labels "Market A0"
+(vRPI₂=4.966) and "CUHK03 A3" (vRPI₂=4.977) sit 0.011 apart on a 0–6.6
+scale and print on top of each other as unreadable garble; the left panel
+("Exposure expansion replicates") has a milder version of the same crowd
+(Market A0 .547 vs CUHK03 A3 .502). This was flagged but left unfixed in
+§7 of this document during the print-spec pass, since fixing a label
+collision baked into a raster asset requires regenerating the plot from
+data, which was out of scope then. This pass regenerates both
+`fig_replication.png` and `fig_release_trends.png` as native vector
+pgfplots/TikZ figures (`assets/fig_replication_vector.tex`,
+`assets/fig_release_trends_vector.tex`, `\input`-ed into the poster inside
+`\resizebox{0.94\linewidth}{!}{...}` in place of the old
+`\includegraphics`), fixing the collision and removing the DPI constraint.
+The two PNGs and their intermediate `_cmyk.pdf` raster conversions are left
+in `assets/` for reference but are no longer referenced by the `.tex`.
+`\usepackage{pgfplots}` + `\pgfplotsset{compat=1.18}` +
+`\usepgfplotslibrary{groupplots}` were added to the preamble.
+
+### Series inventory (reverse-engineered from the PNGs before writing any code)
+
+**`fig_replication.png`** — 2 panels (P_guess, vRPI₂) × R1→R2, 4 series,
+circular markers, end-of-line text labels (no legend box):
+- Market A3 (green), Market A0 (royal blue), CUHK03 A3 (dark navy), CUHK03 A0 (orange).
+
+**`fig_release_trends.png`** — 2 panels (P_guess, vRPI₂) × R1–R4, 5 series,
+shared top legend (not end-of-line labels):
+- A0 (royal blue circle, line R1–R3), A3 (green square, line R1–R3), A4
+  (orange triangle, line R1–R3), A2 (navy diamond, isolated marker at R4
+  only), A0-Graph (red X, isolated marker at R4 only).
+- **Attacker A1 (linear probe) does NOT appear in this figure**, confirmed
+  by direct pixel inspection of the legend row (only 5 marker/label pairs:
+  A0, A3, A4, A2, A0-Graph) — even though the paper's own commented-out
+  pgfplots source for the analogous figure (`tab:exp_means` discussion,
+  `fig:release_two_panel_new`) includes a 6th A1 series. This is a
+  deliberate declutter choice in the poster's version of the figure, not
+  an omission bug, and was reproduced faithfully (A1 was NOT added back).
+
+### Colours (pixel-sampled from the PNGs, converted RGB→CMYK)
+
+Sampled dominant RGB per series via a histogram scan of both PNGs (excluding
+near-white/black/gray background pixels), then converted with the standard
+`K=1-max(R,G,B)/255` formula. Every sampled colour matched an
+**already-defined** poster palette colour to 3 decimal places, so no new
+colours were introduced — the author's original plotting script was already
+using the poster's own brand palette:
+
+| series role | sampled RGB | poster colour | CMYK |
+|---|---|---|---|
+| Market A0 / A0 | (22,90,159) | `royal` | 0.862, 0.434, 0.000, 0.376 |
+| Market A3 / A3 | (22,128,58) | `green` | 0.828, 0.000, 0.547, 0.498 |
+| CUHK03 A3 / A2 | (13,60,120) | `navy2` | 0.892, 0.500, 0.000, 0.529 |
+| CUHK03 A0 / A4 | (201,109,0) | `orange` | 0.000, 0.458, 1.000, 0.212 |
+| A0-Graph | (177,32,32) | `red` | 0.000, 0.819, 0.819, 0.306 |
+
+### Data points (every one checked against the paper, read-only)
+
+`fig_replication.png` ↔ `tab:cuhk_replication`:
+
+| Series | R1 P_g | R2 P_g | R1 vRPI₂ | R2 vRPI₂ |
+|---|---|---|---|---|
+| Market A0 | .197 | .547 | .873 | 4.966 |
+| Market A3 | .368 | .691 | 5.198 | 5.943 |
+| CUHK03 A0 | .226 | .399 | .530 | 3.325 |
+| CUHK03 A3 | .313 | .502 | 4.549 | 4.977 |
+
+All 16 values match `tab:cuhk_replication` exactly (N=736 Market / N=700
+CUHK03, as stated in the paper text — the table caption explains N differs
+from `tab:exp_means` because this is a separate, lighter paired protocol
+retaining only identities with ≥4 images).
+
+`fig_release_trends.png` ↔ `tab:exp_means` (Market-1501-τ, N=751):
+
+| Attacker | R1 | R2 | R3 | R4 |
+|---|---|---|---|---|
+| A0 P_guess | .2883 | .7491 | .7529 | — |
+| A0 vRPI₂ | 4.3319 | 6.2119 | 5.9271 | — |
+| A3 P_guess | .4073 | .7063 | .7092 | — |
+| A3 vRPI₂ | 4.7231 | 5.9402 | 5.9368 | — |
+| A4 P_guess | .5073 | .7304 | .7238 | — |
+| A4 vRPI₂ | 5.0912 | 6.0133 | 6.0060 | — |
+| A2 P_guess | — | — | — | .7519 |
+| A2 vRPI₂ | — | — | — | 6.3572 |
+| A0-Graph P_guess | — | — | — | .7366 |
+| A0-Graph vRPI₂ | — | — | — | 5.6697 |
+
+All values match `tab:exp_means` exactly. A0, A3, and A4 have no R4 row in
+the table (R4 only reports A2 and A0-Graph), so their lines correctly stop
+at R3 with no R4 marker — drawing them through R4 would have been
+fabricated data, which the original PNG also correctly avoided and the
+vector version preserves. **No mismatch was found between either PNG and
+the paper** — every plotted value in both original raster figures was
+already numerically correct; the only defect was the R2 label collision.
+
+### Collision fix
+
+Both are end-of-line text labels placed at `axis cs:R2,<value>` via
+explicit `\node` commands after the `\addplot`s (`clip=false` on the
+replication axes so labels/leaders may extend past the axis box). The fix
+keeps every data point and line exactly where the raw numbers put it and
+only moves the label *text*:
+
+- **Right panel (severe collision, Market A0 4.966 vs CUHK03 A3 4.977):**
+  empirically, at this panel's scale (4cm axis height / 6.6 range) a
+  `\normalsize` text block is ≈0.7 axis units tall, so labels need
+  ≥0.85-unit centre spacing to clear each other — confirmed by an initial
+  attempt at 0.39-unit spacing, which still overlapped on render (see
+  iteration below). Final label centres, top to bottom: Market A3 5.943
+  (unmoved), CUHK03 A3 5.05, Market A0 4.20, CUHK03 A0 3.325 (unmoved).
+  Each moved label gets a short leader line (thin, series-coloured) back to
+  its true (unmoved) data point at R2.
+- **Left panel (milder crowd, Market A0 .547 vs CUHK03 A3 .502):** same
+  treatment at the smaller scale (0.12-unit minimum spacing at this
+  panel's 4cm/0.80 scale). All four labels evenly re-staggered to 0.12-unit
+  steps (Market A3 .725, Market A0 .605, CUHK03 A3 .485, CUHK03 A0 .365),
+  each with a leader line back to its true point, since the available span
+  between the two unmoved-would-be endpoints (.691/.399) was too narrow
+  (0.292) to fit 4 labels at the minimum 0.12 spacing (needs 0.36) without
+  nudging the outer two slightly as well.
+
+**Iteration note:** the first attempt spaced the right-panel labels only
+0.39 units apart (matching the panel's numeric gap intuition, not its
+rendered text size) and — confirmed by rendering and visually inspecting —
+still produced an overlap ("Market"/"CUHK0..." text visibly stacked on top
+of each other), which is exactly the kind of defect this task warns
+automated checks cannot catch. Spacing was recomputed from measured text
+height and re-rendered until visually clear.
+
+### Visual comparison (old raster vs new vector, rendered at 200 DPI)
+
+- **Series/colour/style fidelity:** identical marker shapes (circle/square/
+  triangle/diamond/X), identical line vs. isolated-marker treatment (A2 and
+  A0-Graph as isolated R4 markers, no fabricated connecting line), identical
+  colours (pixel-sampled, matched to 3 decimals), identical panel titles,
+  axis labels ($P_{guess}$, $vRPI_2$), tick values, gridline style (light
+  gray horizontal only, no vertical grid), and left/bottom-only axis spines
+  (no boxed frame) — reproduced to match the original's despined style.
+- **`fig_release_trends.png` (section 5):** no collision existed here; the
+  vector version is visually indistinguishable from the original in series
+  count, order, styling, and the shared top legend position/columns.
+- **`fig_replication.png` (section 6):** this is the fixed figure. Both
+  panels now show all 4 end-of-line labels fully legible with clear
+  whitespace between every pair — confirmed by cropping the rendered PDF
+  at 200 DPI and inspecting pixel-for-pixel. In the right panel, "Market
+  A0" and "CUHK03 A3" (previously fused into unreadable overlapping glyphs)
+  are now on two distinct, clearly separated lines, each connected to its
+  own unmoved R2 data point by a short colour-matched leader line.
+- **Layout:** both figures are placed via
+  `\resizebox{0.94\linewidth}{!}{...}`, matching the original
+  `\includegraphics[width=0.94\linewidth]` placed width exactly; the
+  poster's `\vfill`-based bottom-of-page slack absorbed the (small) natural
+  height difference from the new vector aspect ratio, so no other section
+  shifted. Full-page render at 90 DPI and 200 DPI crops of sections 5–6
+  confirm no overlap with adjacent boxes and no new Overfull/Underfull
+  box beyond the pre-existing 5pt tolerance.
+
+### `build.ps1` changes
+
+The DPI check (§6 of the script) previously computed DPI for
+`fig-release-trends` and `fig-replication` from their fixed 3156px PNG
+width; since both are now vector, that computation no longer applies and
+was replaced with an informational placed-width log line (still reads the
+live `\linewidth` via the existing `POSTER-CHECK` typeout, just no longer
+converts it to a DPI figure). The katz-logo DPI check is unchanged and
+still passes (204.5 DPI, well above the 100 DPI floor — it remains the
+only raster asset in the poster). Re-ran the full `build.ps1`: all checks
+pass, exit 0.

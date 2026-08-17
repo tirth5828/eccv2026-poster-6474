@@ -1,0 +1,78 @@
+% Vector replacement for fig_replication.png ("Replication + Non-Face Stress Test", section 6).
+% Reverse-engineered from the raster PNG: 2 panels, 4 series (Market A0/A3, CUHK03 A0/A3),
+% circular markers, end-of-line text labels colour-matched to each series.
+% Data source: paper tab:cuhk_replication (Compositional_Non_Face_..._Vision_Releases.tex).
+% Colours: royal/green/navy2/orange are pixel-sampled from the PNG and match the poster's
+% existing CMYK palette exactly (see BUILD_NOTES.md), so no new colours are introduced.
+%
+% Collision fix: at R2 in the right panel, Market A0 (4.966) and CUHK03 A3 (4.977) are
+% almost coincident. Both end-of-line labels are vertically staggered away from the data
+% point and connected back to it with a short leader line, so the label is unambiguous
+% but the data point itself is untouched. The milder R2 crowd in the left panel
+% (Market A0 .547 / CUHK03 A3 .502) gets the same treatment for consistency.
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=2 by 1, horizontal sep=3.0cm},
+  width=8.6cm, height=4.0cm,
+  symbolic x coords={R1,R2},
+  xtick=data,
+  enlarge x limits=0.28,
+  ymajorgrids=true, xmajorgrids=false,
+  grid style={gray!20},
+  axis x line*=bottom, axis y line*=left,
+  tick align=outside,
+  xtick style={draw=none}, ytick style={draw=none},
+  title style={font=\Large, yshift=2pt},
+  label style={font=\normalsize},
+  tick label style={font=\normalsize},
+  clip=false,
+]
+
+%% --- Left panel: P_guess ---
+\nextgroupplot[
+  title={Exposure expansion replicates},
+  ymin=0, ymax=0.80,
+  ylabel={$P_{guess}$},
+]
+\addplot[color=green,  mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,0.368)(R2,0.691)};
+\addplot[color=royal,  mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,0.197)(R2,0.547)};
+\addplot[color=navy2,  mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,0.313)(R2,0.502)};
+\addplot[color=orange, mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,0.226)(R2,0.399)};
+
+% end-of-line labels, evenly re-staggered (0.12-unit steps) so no two labels' text
+% blocks touch -- a 0.12-unit gap at this panel's scale (4cm axis height / 0.80
+% range) is the minimum that keeps \normalsize text clear, measured empirically.
+\node[anchor=west, color=green,  font=\normalsize] at (axis cs:R2,0.725) {Market A3};
+\draw[color=green,  thin] (axis cs:R2,0.691) -- (axis cs:R2,0.725);
+\node[anchor=west, color=royal,  font=\normalsize] at (axis cs:R2,0.605) {Market A0};
+\draw[color=royal,  thin] (axis cs:R2,0.547) -- (axis cs:R2,0.605);
+\node[anchor=west, color=navy2,  font=\normalsize] at (axis cs:R2,0.485) {CUHK03 A3};
+\draw[color=navy2,  thin] (axis cs:R2,0.502) -- (axis cs:R2,0.485);
+\node[anchor=west, color=orange, font=\normalsize] at (axis cs:R2,0.365) {CUHK03 A0};
+\draw[color=orange, thin] (axis cs:R2,0.399) -- (axis cs:R2,0.365);
+
+%% --- Right panel: vRPI2 ---
+\nextgroupplot[
+  title={Pressure rises on both datasets},
+  ymin=0, ymax=6.6,
+  ylabel={$vRPI_2$},
+]
+\addplot[color=green,  mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,5.198)(R2,5.943)};
+\addplot[color=royal,  mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,0.873)(R2,4.966)};
+\addplot[color=navy2,  mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,4.549)(R2,4.977)};
+\addplot[color=orange, mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,0.530)(R2,3.325)};
+
+% end-of-line labels: Market A0 (4.966) and CUHK03 A3 (4.977) are the severe collision --
+% at this panel's scale (4cm axis height / 6.6 range) a text block is roughly 0.7 axis
+% units tall, so labels need >=0.85-unit centre spacing to clear each other; both
+% colliding labels are staggered well apart (above / below) with a leader line back to
+% the true (unmoved) data point.
+\node[anchor=west, color=green,  font=\normalsize] at (axis cs:R2,5.943) {Market A3};
+\node[anchor=west, color=navy2,  font=\normalsize] at (axis cs:R2,5.05) {CUHK03 A3};
+\draw[color=navy2, thin] (axis cs:R2,4.977) -- (axis cs:R2,5.05);
+\node[anchor=west, color=royal,  font=\normalsize] at (axis cs:R2,4.20) {Market A0};
+\draw[color=royal, thin] (axis cs:R2,4.966) -- (axis cs:R2,4.20);
+\node[anchor=west, color=orange, font=\normalsize] at (axis cs:R2,3.325) {CUHK03 A0};
+
+\end{groupplot}
+\end{tikzpicture}

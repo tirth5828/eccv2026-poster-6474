@@ -129,22 +129,18 @@ Remove-Item "check_decompressed.ps" -ErrorAction SilentlyContinue
 
 # ---------------------------------------------------------------------------
 # 6. Raster DPI at placed size (>=100 DPI required)
-#    Figures are placed at 0.94*linewidth in section 5/6; logo at a fixed 4.4in.
-#    Pixel widths are fixed properties of the source assets.
+#    fig-release-trends and fig-replication (sections 5/6) were converted to native
+#    vector pgfplots/TikZ figures and are no longer raster, so no DPI constraint
+#    applies to them (checked only for informational placed-width logging below).
+#    The Katz logo remains the only raster asset in the poster and is still checked.
 # ---------------------------------------------------------------------------
 $passLog = Get-Content "build_pass2.log" -Raw
-$figPxWidth = @{ "fig-release-trends" = 3156; "fig-replication" = 3156 }
-foreach ($key in $figPxWidth.Keys) {
+foreach ($key in @("fig-release-trends","fig-replication")) {
     $pat = "POSTER-CHECK: $key placed-linewidth-pt=\[([0-9.]+)pt\]"
     if ($passLog -match $pat) {
         $linewidthPt = [double]$Matches[1]
         $placedWidthIn = (0.94 * $linewidthPt) / 72.27
-        $dpi = $figPxWidth[$key] / $placedWidthIn
-        if ($dpi -ge 100) {
-            Pass ("{0}: placed width {1:N2}in -> {2:N1} DPI (>= 100)" -f $key, $placedWidthIn, $dpi)
-        } else {
-            Fail ("{0}: placed width {1:N2}in -> {2:N1} DPI (< 100 !)" -f $key, $placedWidthIn, $dpi)
-        }
+        Pass ("{0}: now vector (pgfplots/TikZ); placed width {1:N2}in, no DPI constraint" -f $key, $placedWidthIn)
     } else {
         Fail "Could not find POSTER-CHECK linewidth for $key in build log"
     }

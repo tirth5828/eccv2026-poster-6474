@@ -18,6 +18,9 @@
 \usepackage{microtype}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,calc,fit}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots}
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.15in}
@@ -253,7 +256,7 @@ R4 & A0-Graph & .7366 & 5.6697 & kNN-graph pathway\\
 \begin{sectionbox}{5. Release Trend: The R1$\rightarrow$R2 Jump Dominates}
 \centering
 \typeout{POSTER-CHECK: fig-release-trends placed-linewidth-pt=[\the\linewidth]}%
-\includegraphics[width=0.94\linewidth]{assets/fig_release_trends_cmyk.pdf}
+\resizebox{0.94\linewidth}{!}{\input{assets/fig_release_trends_vector.tex}}
 \vspace{-0.0794in}
 
 {\captionfont The exposure expansion is the clearest compositional effect. R2$\rightarrow$R3 is stable under validation-tuned fusion and temperature scaling. R4 demonstrates artifact-specific leakage through the prototype/index specialist and graph-exploiting attacker.}
@@ -263,7 +266,7 @@ R4 & A0-Graph & .7366 & 5.6697 & kNN-graph pathway\\
 \begin{sectionbox}{6. Replication + Non-Face Stress Test}
 \centering
 \typeout{POSTER-CHECK: fig-replication placed-linewidth-pt=[\the\linewidth]}%
-\includegraphics[width=0.94\linewidth]{assets/fig_replication_cmyk.pdf}
+\resizebox{0.94\linewidth}{!}{\input{assets/fig_replication_vector.tex}}
 \vspace{-0.0635in}
 
 \smallbody

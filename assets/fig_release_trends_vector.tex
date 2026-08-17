@@ -1,0 +1,66 @@
+% Vector replacement for fig_release_trends.png ("Release Trend: The R1->R2 Jump Dominates",
+% section 5). Reverse-engineered from the raster PNG: 2 panels, 5 series (A0 circle, A3
+% square, A4 triangle -- lines across R1-R3; A2 diamond and A0-Graph X -- isolated markers
+% at R4 only). Attacker A1 (linear probe) does NOT appear in this poster figure (it is
+% present in the paper's fuller version but was deliberately dropped here) -- reproduced
+% as absent, not added back.
+% Data source: paper tab:exp_means (Compositional_Non_Face_..._Vision_Releases.tex).
+% Colours pixel-sampled from the PNG match the poster's existing CMYK palette exactly
+% (royal=A0, green=A3, orange=A4, navy2=A2, red=A0-Graph) -- no new colours introduced.
+% No end-of-line label collision in this figure (top legend, not text labels); converted
+% to vector purely for consistency / to remove the DPI constraint.
+\begin{tikzpicture}
+\begin{groupplot}[
+  group style={group size=2 by 1, horizontal sep=3.0cm},
+  width=8.6cm, height=4.0cm,
+  symbolic x coords={R1,R2,R3,R4},
+  xtick=data,
+  enlarge x limits=0.12,
+  ymajorgrids=true, xmajorgrids=false,
+  grid style={gray!20},
+  axis x line*=bottom, axis y line*=left,
+  tick align=outside,
+  xtick style={draw=none}, ytick style={draw=none},
+  title style={font=\Large, yshift=2pt},
+  label style={font=\normalsize},
+  tick label style={font=\normalsize},
+]
+
+%% --- Left panel: P_guess ---
+\nextgroupplot[
+  title={Identity-guessing success},
+  xlabel={Release stage},
+  ylabel={$P_{guess}$},
+  ymin=0, ymax=0.90,
+  legend style={
+    at={(1.0,1.42)}, anchor=south,
+    legend columns=5, draw=none, font=\normalsize,
+    /tikz/every even column/.append style={column sep=0.6cm},
+  },
+]
+\addplot[color=royal,  mark=*,        mark size=2.6pt, line width=1.3pt] coordinates {(R1,0.2883)(R2,0.7491)(R3,0.7529)};
+\addlegendentry{A0}
+\addplot[color=green,  mark=square*,  mark size=2.4pt, line width=1.3pt] coordinates {(R1,0.4073)(R2,0.7063)(R3,0.7092)};
+\addlegendentry{A3}
+\addplot[color=orange, mark=triangle*,mark size=2.9pt, line width=1.3pt] coordinates {(R1,0.5073)(R2,0.7304)(R3,0.7238)};
+\addlegendentry{A4}
+\addplot[color=navy2,  only marks, mark=diamond*, mark size=3.4pt] coordinates {(R4,0.7519)};
+\addlegendentry{A2}
+\addplot[color=red,    only marks, mark=x, mark size=3.4pt, line width=1.9pt] coordinates {(R4,0.7366)};
+\addlegendentry{A0-Graph}
+
+%% --- Right panel: vRPI2 (legend shared from left) ---
+\nextgroupplot[
+  title={R\'enyi re-identification pressure},
+  xlabel={Release stage},
+  ylabel={$vRPI_2$},
+  ymin=0, ymax=6.8,
+]
+\addplot[color=royal,  mark=*,        mark size=2.6pt, line width=1.3pt] coordinates {(R1,4.3319)(R2,6.2119)(R3,5.9271)};
+\addplot[color=green,  mark=square*,  mark size=2.4pt, line width=1.3pt] coordinates {(R1,4.7231)(R2,5.9402)(R3,5.9368)};
+\addplot[color=orange, mark=triangle*,mark size=2.9pt, line width=1.3pt] coordinates {(R1,5.0912)(R2,6.0133)(R3,6.0060)};
+\addplot[color=navy2,  only marks, mark=diamond*, mark size=3.4pt] coordinates {(R4,6.3572)};
+\addplot[color=red,    only marks, mark=x, mark size=3.4pt, line width=1.9pt] coordinates {(R4,5.6697)};
+
+\end{groupplot}
+\end{tikzpicture}
