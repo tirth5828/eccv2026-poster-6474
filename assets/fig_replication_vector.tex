@@ -10,11 +10,28 @@
 % navy) so the whole poster's numeric charts read as one system. Row order is
 % identical in both panels and matches the paper's tab:cuhk_replication order.
 %
+% LAYOUT (2026-08-17 fix): tabular columns -- row name | R1 value | dumbbell |
+% R2 value -- with EVERY item on its own row's baseline (\ry). The previous
+% version anchored the value labels at \ry+0.20, which floated each pair into
+% the gap between rows so it read against the row ABOVE its own (e.g. CUHK03
+% A0's ".226/.399" sat under the "Market A3" row). A fixed left-hand R1 column
+% is used instead of an inline label at the left dot because CUHK03 A3's arrow
+% is only ~7% of the axis width (4.549->4.977); inline labels at both ends of
+% that row would collide. Total picture width is held at ~23 units because the
+% figure is placed with \resizebox{0.94\linewidth}{!}{...} -- widening it would
+% scale all text down.
+%
 % Data source: paper tab:cuhk_replication. Cross-checked value-for-value
 % against the paper table; see BUILD_NOTES.md. Axis maxima (0.80, 6.6) match
 % the old figure's ymax so nothing is renormalized relative to the prior view.
 \begin{tikzpicture}
-\def\rowLabelW{3.0}\def\rowH{1.05}\def\topPad{1.6}\def\axisW{8.0}
+% valW must clear the widest R1 value ("5.198") AND leave a visible gap from the
+% row name, otherwise "Market A3" + "5.198" read as one string. axisW is trimmed
+% to hold total picture width ~23 units (see \resizebox note above).
+\def\rowLabelW{3.0}\def\valW{2.2}\def\rowH{1.05}\def\topPad{1.6}\def\axisW{4.6}
+
+% plot origin (left edge of the value axis) = row-name column + R1-value column
+\def\plotX{\rowLabelW+\valW}
 
 % ---- legend (light=R1, dark=R2), once per panel ----
 \newcommand{\dlegend}[1]{%
@@ -26,47 +43,54 @@
 
 % ---- panel scaffold: #1 xOffset #2 title #3 xmax #4 metric-axis-label #5 tick-list ----
 \newcommand{\dpanel}[5]{%
-  \node[anchor=north, font=\fsSmall\bfseries\selectfont, color=navy] at (#1+0.5*(\rowLabelW+\axisW),0) {#2};
-  \dlegend{#1+\rowLabelW}
-  \draw[navy, line width=0.9pt] ({#1+\rowLabelW},{-\topPad-4*\rowH}) -- ++({\axisW},0);
+  \node[anchor=north, font=\fsSmall\bfseries\selectfont, color=navy] at (#1+0.5*(\plotX+\axisW),0) {#2};
+  \dlegend{#1+\plotX}
+  \draw[navy, line width=0.9pt] ({#1+\plotX},{-\topPad-4*\rowH}) -- ++({\axisW},0);
   \foreach \tv in {#5} {
-    \pgfmathsetmacro{\tx}{#1+\rowLabelW+(\tv)/(#3)*\axisW}
+    \pgfmathsetmacro{\tx}{#1+\plotX+(\tv)/(#3)*\axisW}
     \draw[gray!20, line width=0.5pt] (\tx,{-\topPad}) -- (\tx,{-\topPad-4*\rowH});
     \draw[navy, line width=0.7pt] (\tx,{-\topPad-4*\rowH}) -- ++(0,-0.07);
     \node[font=\fsSmall\selectfont, color=navy] at (\tx,{-\topPad-4*\rowH-0.32}) {\tv};
   }
-  \node[font=\fsSmall\selectfont, color=navy] at ({#1+\rowLabelW+0.5*\axisW},{-\topPad-4*\rowH-1.02}) {#4};
+  \node[font=\fsSmall\selectfont, color=navy] at ({#1+\plotX+0.5*\axisW},{-\topPad-4*\rowH-1.02}) {#4};
 }
 
 % ---- one dumbbell row: #1 xOffset #2 scale(cm/unit) #3 rowIndex #4 label-line1 #5 label-line2 #6 v1(R1) #7 v2(R2) #8 v1text #9 v2text ----
+% Every element below is placed at \ry -- the row's own vertical centre -- so a
+% value can never be read against a neighbouring row.
 \newcommand{\drow}[9]{%
   \pgfmathsetmacro{\ry}{-\topPad-0.5*\rowH-(#3)*\rowH}
-  \pgfmathsetmacro{\rxone}{#1+\rowLabelW+(#6)*(#2)}
-  \pgfmathsetmacro{\rxtwo}{#1+\rowLabelW+(#7)*(#2)}
-  \node[anchor=east, font=\fsSmall\selectfont, color=navy] at ({#1+\rowLabelW-0.18},{\ry}) {#4~#5};
+  \pgfmathsetmacro{\rxone}{#1+\plotX+(#6)*(#2)}
+  \pgfmathsetmacro{\rxtwo}{#1+\plotX+(#7)*(#2)}
+  % column 1: row name, right-aligned against the value column
+  \node[anchor=east, font=\fsSmall\selectfont, color=navy] at ({#1+\rowLabelW-0.15},{\ry}) {#4~#5};
+  % column 2: R1 value, right-aligned against the plot origin, muted
+  \node[anchor=east, font=\fsSmall\selectfont, color=muted] at ({#1+\plotX-0.25},{\ry}) {#8};
+  % column 3: the dumbbell
   \draw[navy, line width=1.7pt, -{Latex[length=2.4mm,width=1.8mm]}] (\rxone,\ry) -- (\rxtwo,\ry);
   \draw[fill=navyramp2, draw=navy, line width=0.9pt] (\rxone,\ry) circle (0.13);
   \draw[fill=navyramp5, draw=navy, line width=0.9pt] (\rxtwo,\ry) circle (0.15);
-  % Labels flank the pair (R1 label up-left of its dot, R2 label up-right of
-  % its dot) rather than both sitting directly above -- this keeps them from
-  % colliding when the two dots are close together (small R1->R2 gap).
-  \node[anchor=south east, font=\fsSmall\selectfont, color=muted] at ({\rxone-0.10},{\ry+0.20}) {#8};
-  \node[anchor=south west, font=\fsSmall\selectfont, color=navy] at ({\rxtwo+0.10},{\ry+0.20}) {\textbf{#9}};
+  % column 4: R2 value, left-aligned just past the dark dot, bold
+  \node[anchor=west, font=\fsSmall\selectfont, color=navy] at ({\rxtwo+0.22},{\ry}) {\textbf{#9}};
 }
 
 %% ================= Left panel: P_guess =================
+%% scale = axisW / xmax = 4.6 / 0.80 = 5.75
 \dpanel{0}{Exposure expansion replicates}{0.80}{$P_{guess}$}{0,.2,.4,.6,.8}
-\drow{0}{10.0}{0}{Market}{A0}{0.197}{0.547}{.197}{.547}
-\drow{0}{10.0}{1}{Market}{A3}{0.368}{0.691}{.368}{.691}
-\drow{0}{10.0}{2}{CUHK03}{A0}{0.226}{0.399}{.226}{.399}
-\drow{0}{10.0}{3}{CUHK03}{A3}{0.313}{0.502}{.313}{.502}
+\drow{0}{5.75}{0}{Market}{A0}{0.197}{0.547}{.197}{.547}
+\drow{0}{5.75}{1}{Market}{A3}{0.368}{0.691}{.368}{.691}
+\drow{0}{5.75}{2}{CUHK03}{A0}{0.226}{0.399}{.226}{.399}
+\drow{0}{5.75}{3}{CUHK03}{A3}{0.313}{0.502}{.313}{.502}
 
 %% ================= Right panel: vRPI2 =================
-\def\xR{12.0}
+%% scale = axisW / xmax = 4.6 / 6.6 = 0.69697
+% Panel gap must clear the widest left-panel R2 label (".691") from the right
+% panel's first row name ("Market A3"); at 11.2 they touched.
+\def\xR{12.2}
 \dpanel{\xR}{Pressure rises on both datasets}{6.6}{$vRPI_2$}{0,2,4,6}
-\drow{\xR}{1.2121}{0}{Market}{A0}{0.873}{4.966}{.873}{4.966}
-\drow{\xR}{1.2121}{1}{Market}{A3}{5.198}{5.943}{5.198}{5.943}
-\drow{\xR}{1.2121}{2}{CUHK03}{A0}{0.530}{3.325}{.530}{3.325}
-\drow{\xR}{1.2121}{3}{CUHK03}{A3}{4.549}{4.977}{4.549}{4.977}
+\drow{\xR}{0.69697}{0}{Market}{A0}{0.873}{4.966}{.873}{4.966}
+\drow{\xR}{0.69697}{1}{Market}{A3}{5.198}{5.943}{5.198}{5.943}
+\drow{\xR}{0.69697}{2}{CUHK03}{A0}{0.530}{3.325}{.530}{3.325}
+\drow{\xR}{0.69697}{3}{CUHK03}{A3}{4.549}{4.977}{4.549}{4.977}
 
 \end{tikzpicture}
