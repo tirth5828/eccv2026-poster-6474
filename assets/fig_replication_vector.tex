@@ -1,83 +1,72 @@
-% Vector replacement for fig_replication.png ("Replication + Non-Face Stress Test", section 6).
-% Reverse-engineered from the raster PNG: 2 panels, 4 series (Market A0/A3, CUHK03 A0/A3),
-% circular markers, end-of-line text labels colour-matched to each series.
-% Data source: paper tab:cuhk_replication (Compositional_Non_Face_..._Vision_Releases.tex).
-% Colours: royal/green/navy2/orange are pixel-sampled from the PNG and match the poster's
-% existing CMYK palette exactly (see BUILD_NOTES.md), so no new colours are introduced.
+% Dumbbell (before->after) replacement for the old §6 line chart (2026-08-17
+% chart redesign). Rationale: the old figure had four "lines" spanning only
+% two x-positions (R1, R2) that nearly collide at R2 (Market A0 4.966 vs
+% CUHK03 A3 4.977) -- that is a before/after comparison wearing line-chart
+% grammar, not a trend. A dumbbell says exactly that: one dot per stage, one
+% arrow, and the claim ("every arrow points right") is visually unmistakable.
 %
-% Collision fix: at R2 in the right panel, Market A0 (4.966) and CUHK03 A3 (4.977) are
-% almost coincident. Both end-of-line labels are vertically staggered away from the data
-% point and connected back to it with a short leader line, so the label is unambiguous
-% but the data point itself is untouched. The milder R2 crowd in the left panel
-% (Market A0 .547 / CUHK03 A3 .502) gets the same treatment for consistency.
+% Two panels, one row per dataset x attacker, light dot = R1, dark dot = R2,
+% same two navy shades used in the §5 heatmap ramp (navyramp2 / navyramp5 ==
+% navy) so the whole poster's numeric charts read as one system. Row order is
+% identical in both panels and matches the paper's tab:cuhk_replication order.
+%
+% Data source: paper tab:cuhk_replication. Cross-checked value-for-value
+% against the paper table; see BUILD_NOTES.md. Axis maxima (0.80, 6.6) match
+% the old figure's ymax so nothing is renormalized relative to the prior view.
 \begin{tikzpicture}
-\begin{groupplot}[
-  group style={group size=2 by 1, horizontal sep=3.0cm},
-  width=8.6cm, height=4.0cm,
-  symbolic x coords={R1,R2},
-  xtick=data,
-  enlarge x limits=0.28,
-  ymajorgrids=true, xmajorgrids=false,
-  grid style={gray!20},
-  axis x line*=bottom, axis y line*=left,
-  tick align=outside,
-  xtick style={draw=none}, ytick style={draw=none},
-  title style={font=\Large, yshift=2pt},
-  label style={font=\normalsize},
-  tick label style={font=\normalsize},
-  clip=false,
-]
+\def\rowLabelW{3.0}\def\rowH{1.05}\def\topPad{1.6}\def\axisW{8.0}
 
-%% --- Left panel: P_guess ---
-\nextgroupplot[
-  title={Exposure expansion replicates},
-  ymin=0, ymax=0.80,
-  ylabel={$P_{guess}$},
-]
-\addplot[color=green,  mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,0.368)(R2,0.691)};
-\addplot[color=royal,  mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,0.197)(R2,0.547)};
-\addplot[color=navy2,  mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,0.313)(R2,0.502)};
-\addplot[color=orange, mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,0.226)(R2,0.399)};
+% ---- legend (light=R1, dark=R2), once per panel ----
+\newcommand{\dlegend}[1]{%
+  \draw[fill=navyramp2, draw=navy, line width=0.8pt] ({#1+0.0},{-0.75}) circle (0.09);
+  \node[anchor=west, font=\fsSmall\selectfont, color=navy] at ({#1+0.20},{-0.75}) {R1};
+  \draw[fill=navyramp5, draw=navy, line width=0.8pt] ({#1+1.55},{-0.75}) circle (0.10);
+  \node[anchor=west, font=\fsSmall\selectfont, color=navy] at ({#1+1.76},{-0.75}) {R2};
+}
 
-% end-of-line labels, evenly re-staggered (0.12-unit steps) so no two labels' text
-% blocks touch -- a 0.12-unit gap at this panel's scale (4cm axis height / 0.80
-% range) is the minimum that keeps \normalsize text clear, measured empirically.
-\node[anchor=west, color=green,  font=\normalsize] at (axis cs:R2,0.725) {Market A3};
-\draw[color=green,  thin] (axis cs:R2,0.691) -- (axis cs:R2,0.725);
-\node[anchor=west, color=royal,  font=\normalsize] at (axis cs:R2,0.605) {Market A0};
-\draw[color=royal,  thin] (axis cs:R2,0.547) -- (axis cs:R2,0.605);
-\node[anchor=west, color=navy2,  font=\normalsize] at (axis cs:R2,0.485) {CUHK03 A3};
-\draw[color=navy2,  thin] (axis cs:R2,0.502) -- (axis cs:R2,0.485);
-\node[anchor=west, color=orange, font=\normalsize] at (axis cs:R2,0.365) {CUHK03 A0};
-\draw[color=orange, thin] (axis cs:R2,0.399) -- (axis cs:R2,0.365);
+% ---- panel scaffold: #1 xOffset #2 title #3 xmax #4 metric-axis-label #5 tick-list ----
+\newcommand{\dpanel}[5]{%
+  \node[anchor=north, font=\fsSmall\bfseries\selectfont, color=navy] at (#1+0.5*(\rowLabelW+\axisW),0) {#2};
+  \dlegend{#1+\rowLabelW}
+  \draw[navy, line width=0.9pt] ({#1+\rowLabelW},{-\topPad-4*\rowH}) -- ++({\axisW},0);
+  \foreach \tv in {#5} {
+    \pgfmathsetmacro{\tx}{#1+\rowLabelW+(\tv)/(#3)*\axisW}
+    \draw[gray!20, line width=0.5pt] (\tx,{-\topPad}) -- (\tx,{-\topPad-4*\rowH});
+    \draw[navy, line width=0.7pt] (\tx,{-\topPad-4*\rowH}) -- ++(0,-0.07);
+    \node[font=\fsSmall\selectfont, color=navy] at (\tx,{-\topPad-4*\rowH-0.32}) {\tv};
+  }
+  \node[font=\fsSmall\selectfont, color=navy] at ({#1+\rowLabelW+0.5*\axisW},{-\topPad-4*\rowH-1.02}) {#4};
+}
 
-%% --- Right panel: vRPI2 ---
-\nextgroupplot[
-  title={Pressure rises on both datasets},
-  ymin=0, ymax=6.6,
-  ylabel={$vRPI_2$},
-]
-\addplot[color=green,  mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,5.198)(R2,5.943)};
-\addplot[color=royal,  mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,0.873)(R2,4.966)};
-\addplot[color=navy2,  mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,4.549)(R2,4.977)};
-\addplot[color=orange, mark=*, mark size=2.6pt, line width=1.3pt] coordinates {(R1,0.530)(R2,3.325)};
+% ---- one dumbbell row: #1 xOffset #2 scale(cm/unit) #3 rowIndex #4 label-line1 #5 label-line2 #6 v1(R1) #7 v2(R2) #8 v1text #9 v2text ----
+\newcommand{\drow}[9]{%
+  \pgfmathsetmacro{\ry}{-\topPad-0.5*\rowH-(#3)*\rowH}
+  \pgfmathsetmacro{\rxone}{#1+\rowLabelW+(#6)*(#2)}
+  \pgfmathsetmacro{\rxtwo}{#1+\rowLabelW+(#7)*(#2)}
+  \node[anchor=east, font=\fsSmall\selectfont, color=navy] at ({#1+\rowLabelW-0.18},{\ry}) {#4~#5};
+  \draw[navy, line width=1.7pt, -{Latex[length=2.4mm,width=1.8mm]}] (\rxone,\ry) -- (\rxtwo,\ry);
+  \draw[fill=navyramp2, draw=navy, line width=0.9pt] (\rxone,\ry) circle (0.13);
+  \draw[fill=navyramp5, draw=navy, line width=0.9pt] (\rxtwo,\ry) circle (0.15);
+  % Labels flank the pair (R1 label up-left of its dot, R2 label up-right of
+  % its dot) rather than both sitting directly above -- this keeps them from
+  % colliding when the two dots are close together (small R1->R2 gap).
+  \node[anchor=south east, font=\fsSmall\selectfont, color=muted] at ({\rxone-0.10},{\ry+0.20}) {#8};
+  \node[anchor=south west, font=\fsSmall\selectfont, color=navy] at ({\rxtwo+0.10},{\ry+0.20}) {\textbf{#9}};
+}
 
-% end-of-line labels: Market A3 (5.943), CUHK03 A3 (4.977) and Market A0 (4.966) all sit
-% within ~1 axis unit of each other, and an earlier fix that staggered CUHK03 A3 to
-% y=5.05 still overprinted Market A0's own (unmoved) label immediately below it. Fix:
-% all four labels are placed on a uniform 1.2-axis-unit ladder (measured empirically by
-% rendering and pixel-probing the text rows: 1.2 units here leaves a clean gap between
-% each label's glyph bounding box, comfortably more than the ~0.5-unit ladder that was
-% still visibly crowding), each with its own leader line back to its true (unmoved) data
-% point, so every label is unambiguous and no two text blocks touch.
-\node[anchor=west, color=green,  font=\normalsize] at (axis cs:R2,6.15) {Market A3};
-\draw[color=green,  thin] (axis cs:R2,5.943) -- (axis cs:R2,6.15);
-\node[anchor=west, color=navy2,  font=\normalsize] at (axis cs:R2,4.95) {CUHK03 A3};
-\draw[color=navy2, thin] (axis cs:R2,4.977) -- (axis cs:R2,4.95);
-\node[anchor=west, color=royal,  font=\normalsize] at (axis cs:R2,3.75) {Market A0};
-\draw[color=royal, thin] (axis cs:R2,4.966) -- (axis cs:R2,3.75);
-\node[anchor=west, color=orange, font=\normalsize] at (axis cs:R2,2.55) {CUHK03 A0};
-\draw[color=orange, thin] (axis cs:R2,3.325) -- (axis cs:R2,2.55);
+%% ================= Left panel: P_guess =================
+\dpanel{0}{Exposure expansion replicates}{0.80}{$P_{guess}$}{0,.2,.4,.6,.8}
+\drow{0}{10.0}{0}{Market}{A0}{0.197}{0.547}{.197}{.547}
+\drow{0}{10.0}{1}{Market}{A3}{0.368}{0.691}{.368}{.691}
+\drow{0}{10.0}{2}{CUHK03}{A0}{0.226}{0.399}{.226}{.399}
+\drow{0}{10.0}{3}{CUHK03}{A3}{0.313}{0.502}{.313}{.502}
 
-\end{groupplot}
+%% ================= Right panel: vRPI2 =================
+\def\xR{12.0}
+\dpanel{\xR}{Pressure rises on both datasets}{6.6}{$vRPI_2$}{0,2,4,6}
+\drow{\xR}{1.2121}{0}{Market}{A0}{0.873}{4.966}{.873}{4.966}
+\drow{\xR}{1.2121}{1}{Market}{A3}{5.198}{5.943}{5.198}{5.943}
+\drow{\xR}{1.2121}{2}{CUHK03}{A0}{0.530}{3.325}{.530}{3.325}
+\drow{\xR}{1.2121}{3}{CUHK03}{A3}{4.549}{4.977}{4.549}{4.977}
+
 \end{tikzpicture}

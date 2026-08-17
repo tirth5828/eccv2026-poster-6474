@@ -1,66 +1,93 @@
-% Vector replacement for fig_release_trends.png ("Release Trend: The R1->R2 Jump Dominates",
-% section 5). Reverse-engineered from the raster PNG: 2 panels, 5 series (A0 circle, A3
-% square, A4 triangle -- lines across R1-R3; A2 diamond and A0-Graph X -- isolated markers
-% at R4 only). Attacker A1 (linear probe) does NOT appear in this poster figure (it is
-% present in the paper's fuller version but was deliberately dropped here) -- reproduced
-% as absent, not added back.
+% Heatmap replacement for the old §5 line chart (2026-08-17 chart redesign).
+% Rationale: A0/A3/A4 converge to within 0.04 after R2 (three lines overlap into
+% one band) and A2/A0-Graph are single R4-only points forced into line-chart
+% grammar. A heatmap removes both problems -- convergence just means adjacent
+% cells share a shade, and an R4-only attacker is simply a row with three blank
+% cells, which is a completely normal heatmap shape.
+%
+% Two panels, rows=attackers, columns=release stages, cell shade=magnitude
+% (sequential navy ramp, scaled independently per metric), exact value printed
+% in every present cell. Attacker A1 (omitted from the old line-chart version)
+% is included here: a heatmap grid is free to add a row, and A1 already appears
+% in the §7 attacker ladder, so leaving it out here would look inconsistent.
+%
 % Data source: paper tab:exp_means (Compositional_Non_Face_..._Vision_Releases.tex).
-% Colours pixel-sampled from the PNG match the poster's existing CMYK palette exactly
-% (royal=A0, green=A3, orange=A4, navy2=A2, red=A0-Graph) -- no new colours introduced.
-% No end-of-line label collision in this figure (top legend, not text labels); converted
-% to vector purely for consistency / to remove the DPI constraint.
+% Cross-checked value-for-value against the paper table; see BUILD_NOTES.md.
+% Colours: navyramp1..5 (navyramp5 == navy) and heatempty, all native CMYK,
+% defined once in the main .tex preamble. No RGB, no new hue.
+%
+% Shade buckets (1=lightest..5=navy, 0=no value) were assigned by linear
+% min-max normalization of each metric's *present* values only (P_guess:
+% min=.1600 @A1/R1, max=.7529 @A0/R3; vRPI2: min=1.6561 @A1/R1, max=6.3572
+% @A2/R4), so shade is comparable within a panel. Text colour flips to white
+% starting at bucket 3 for legibility on the darker fills (checked by render).
 \begin{tikzpicture}
-\begin{groupplot}[
-  group style={group size=2 by 1, horizontal sep=3.0cm},
-  width=8.6cm, height=4.0cm,
-  symbolic x coords={R1,R2,R3,R4},
-  xtick={R1,R2,R3,R4},
-  enlarge x limits=0.15,
-  ymajorgrids=true, xmajorgrids=false,
-  grid style={gray!20},
-  axis x line*=bottom, axis y line*=left,
-  tick align=outside,
-  xtick style={draw=none}, ytick style={draw=none},
-  title style={font=\Large, yshift=2pt},
-  label style={font=\normalsize},
-  tick label style={font=\normalsize},
-]
+\def\cellW{2.0}\def\cellH{0.62}\def\labelW{2.5}\def\headerH{0.55}
+\def\gridTop{-1.12}
 
-%% --- Left panel: P_guess ---
-\nextgroupplot[
-  title={Identity-guessing success},
-  xlabel={Release stage},
-  ylabel={$P_{guess}$},
-  ymin=0, ymax=0.90,
-  legend style={
-    at={(1.0,1.42)}, anchor=south,
-    legend columns=5, draw=none, font=\normalsize,
-    /tikz/every even column/.append style={column sep=0.6cm},
-  },
-]
-\addplot[color=royal,  mark=*,        mark size=2.6pt, line width=1.3pt] coordinates {(R1,0.2883)(R2,0.7491)(R3,0.7529)};
-\addlegendentry{A0}
-\addplot[color=green,  mark=square*,  mark size=2.4pt, line width=1.3pt] coordinates {(R1,0.4073)(R2,0.7063)(R3,0.7092)};
-\addlegendentry{A3}
-\addplot[color=orange, mark=triangle*,mark size=2.9pt, line width=1.3pt] coordinates {(R1,0.5073)(R2,0.7304)(R3,0.7238)};
-\addlegendentry{A4}
-\addplot[color=navy2,  only marks, mark=diamond*, mark size=3.4pt] coordinates {(R4,0.7519)};
-\addlegendentry{A2}
-\addplot[color=red,    only marks, mark=x, mark size=3.4pt, line width=1.9pt] coordinates {(R4,0.7366)};
-\addlegendentry{A0-Graph}
+% ---- reusable per-cell drawer: #1 xOffset #2 row #3 col #4 bucket(0-5) #5 text ----
+\newcommand{\hcell}[5]{%
+  \pgfmathsetmacro{\cx}{#1+\labelW+(#3)*\cellW}%
+  \pgfmathsetmacro{\cy}{\gridTop-(#2)*\cellH}%
+  \ifcase#4
+    \draw[fill=heatempty, draw=white, line width=1.0pt] (\cx,\cy) rectangle ++(\cellW-0.05,-(\cellH-0.05));
+    \node[font=\fsSmall\selectfont, color=muted] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
+  \or
+    \draw[fill=navyramp1, draw=white, line width=1.0pt] (\cx,\cy) rectangle ++(\cellW-0.05,-(\cellH-0.05));
+    \node[font=\fsSmall\selectfont, color=navy] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
+  \or
+    \draw[fill=navyramp2, draw=white, line width=1.0pt] (\cx,\cy) rectangle ++(\cellW-0.05,-(\cellH-0.05));
+    \node[font=\fsSmall\selectfont, color=navy] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
+  \or
+    \draw[fill=navyramp3, draw=white, line width=1.0pt] (\cx,\cy) rectangle ++(\cellW-0.05,-(\cellH-0.05));
+    \node[font=\fsSmall\selectfont, color=white] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
+  \or
+    \draw[fill=navyramp4, draw=white, line width=1.0pt] (\cx,\cy) rectangle ++(\cellW-0.05,-(\cellH-0.05));
+    \node[font=\fsSmall\selectfont, color=white] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
+  \or
+    \draw[fill=navyramp5, draw=white, line width=1.0pt] (\cx,\cy) rectangle ++(\cellW-0.05,-(\cellH-0.05));
+    \node[font=\fsSmall\selectfont, color=white] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
+  \fi
+}
 
-%% --- Right panel: vRPI2 (legend shared from left) ---
-\nextgroupplot[
-  title={R\'enyi re-identification pressure},
-  xlabel={Release stage},
-  ylabel={$vRPI_2$},
-  ymin=0, ymax=6.8,
-]
-\addplot[color=royal,  mark=*,        mark size=2.6pt, line width=1.3pt] coordinates {(R1,4.3319)(R2,6.2119)(R3,5.9271)};
-\addplot[color=green,  mark=square*,  mark size=2.4pt, line width=1.3pt] coordinates {(R1,4.7231)(R2,5.9402)(R3,5.9368)};
-\addplot[color=orange, mark=triangle*,mark size=2.9pt, line width=1.3pt] coordinates {(R1,5.0912)(R2,6.0133)(R3,6.0060)};
-\addplot[color=navy2,  only marks, mark=diamond*, mark size=3.4pt] coordinates {(R4,6.3572)};
-\addplot[color=red,    only marks, mark=x, mark size=3.4pt, line width=1.9pt] coordinates {(R4,5.6697)};
+% ---- reusable panel scaffold: #1 xOffset #2 title ----
+\newcommand{\hpanel}[2]{%
+  \node[anchor=north, font=\fsSmall\bfseries\selectfont, color=navy] at (#1+0.5*(\labelW+4*\cellW),0) {#2};
+  \foreach \c/\name in {0/R1,1/R2,2/R3,3/R4} {
+    \node[font=\fsSmall\selectfont, color=navy] at ({#1+\labelW+(\c+0.5)*\cellW},{-0.62-0.5*\headerH}) {\name};
+  }
+  \foreach \r/\name in {0/A0,1/A1,2/A3,3/A4,4/A2,5/A0-Graph} {
+    \node[anchor=east, font=\fsSmall\selectfont, color=navy] at ({#1+\labelW-0.12},{\gridTop-(\r+0.5)*\cellH}) {\name};
+  }
+}
 
-\end{groupplot}
+%% ================= Left panel: P_guess =================
+\hpanel{0}{Identity-guessing success}
+\hcell{0}{0}{0}{2}{.2883} \hcell{0}{0}{1}{5}{.7491} \hcell{0}{0}{2}{5}{.7529} \hcell{0}{0}{3}{0}{--}
+\hcell{0}{1}{0}{1}{.1600} \hcell{0}{1}{1}{4}{.5375} \hcell{0}{1}{2}{4}{.5372} \hcell{0}{1}{3}{0}{--}
+\hcell{0}{2}{0}{3}{.4073} \hcell{0}{2}{1}{5}{.7063} \hcell{0}{2}{2}{5}{.7092} \hcell{0}{2}{3}{0}{--}
+\hcell{0}{3}{0}{3}{.5073} \hcell{0}{3}{1}{5}{.7304} \hcell{0}{3}{2}{5}{.7238} \hcell{0}{3}{3}{0}{--}
+\hcell{0}{4}{0}{0}{--}    \hcell{0}{4}{1}{0}{--}    \hcell{0}{4}{2}{0}{--}    \hcell{0}{4}{3}{5}{.7519}
+\hcell{0}{5}{0}{0}{--}    \hcell{0}{5}{1}{0}{--}    \hcell{0}{5}{2}{0}{--}    \hcell{0}{5}{3}{5}{.7366}
+
+%% ================= Right panel: vRPI2 =================
+\def\xR{11.7}
+\hpanel{\xR}{R\'enyi re-identification pressure}
+\hcell{\xR}{0}{0}{3}{4.3319} \hcell{\xR}{0}{1}{5}{6.2119} \hcell{\xR}{0}{2}{5}{5.9271} \hcell{\xR}{0}{3}{0}{--}
+\hcell{\xR}{1}{0}{1}{1.6561} \hcell{\xR}{1}{1}{4}{4.9997} \hcell{\xR}{1}{2}{4}{4.9917} \hcell{\xR}{1}{3}{0}{--}
+\hcell{\xR}{2}{0}{4}{4.7231} \hcell{\xR}{2}{1}{5}{5.9402} \hcell{\xR}{2}{2}{5}{5.9368} \hcell{\xR}{2}{3}{0}{--}
+\hcell{\xR}{3}{0}{4}{5.0912} \hcell{\xR}{3}{1}{5}{6.0133} \hcell{\xR}{3}{2}{5}{6.0060} \hcell{\xR}{3}{3}{0}{--}
+\hcell{\xR}{4}{0}{0}{--}     \hcell{\xR}{4}{1}{0}{--}     \hcell{\xR}{4}{2}{0}{--}     \hcell{\xR}{4}{3}{5}{6.3572}
+\hcell{\xR}{5}{0}{0}{--}     \hcell{\xR}{5}{1}{0}{--}     \hcell{\xR}{5}{2}{0}{--}     \hcell{\xR}{5}{3}{5}{5.6697}
+
+%% ================= Shared ramp legend (pale -> dark) =================
+\newcommand{\hramp}[1]{%
+  \node[font=\fsSmall\selectfont, color=muted, anchor=east] at (#1-0.15,-4.98) {low};
+  \foreach \i/\col in {0/navyramp1,1/navyramp2,2/navyramp3,3/navyramp4,4/navyramp5} {
+    \draw[fill=\col, draw=white, line width=0.6pt] ({#1+\i*0.42},-5.14) rectangle ++(0.38,-0.32);
+  }
+  \node[font=\fsSmall\selectfont, color=muted, anchor=west] at (#1+5*0.42+0.15,-4.98) {high};
+}
+\hramp{\labelW}
+\hramp{\xR+\labelW}
 \end{tikzpicture}

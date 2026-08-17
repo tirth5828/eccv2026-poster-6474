@@ -816,3 +816,121 @@ at 40 DPI and each of the 3 columns at 150 DPI, side by side:
   used only for tables, captions, diagram labels, and footer secondary
   text, matched to the old `\tablefont` (19.051pt), so legibility at
   poster-viewing distance is unchanged from the original design.
+
+## Section 5 & 6 chart redesign
+
+Replaced the §5 line chart (`assets/fig_release_trends_vector.tex`) with two
+annotated heatmaps, and the §6 line chart (`assets/fig_replication_vector.tex`)
+with two dumbbell (before→after) panels. Reason: in §5, A0/A3/A4 converged to
+within 0.04 after R2 (three overlapping lines) and A2/A0-Graph were single
+R4-only points forced into line-chart grammar; in §6, four "lines" spanned
+only two x-positions and nearly collided at R2 (Market A0 4.966 vs CUHK03 A3
+4.977). Neither is a trend a line chart should be drawing.
+
+### Data cross-check against the paper
+
+Every value below was checked character-for-character against
+`Compositional_Non_Face_Re_Identification_Pressure_under_Cumulative_Vision_Releases.tex`
+(read-only source). No number was changed, invented, or interpolated.
+
+**§5 — `tab:exp_means` (lines 828–844):**
+
+| Attacker | R1 P_g / vRPI2 | R2 P_g / vRPI2 | R3 P_g / vRPI2 | R4 P_g / vRPI2 |
+|---|---|---|---|---|
+| A0 | .2883 / 4.3319 | .7491 / 6.2119 | .7529 / 5.9271 | — |
+| A1 | .1600 / 1.6561 | .5375 / 4.9997 | .5372 / 4.9917 | — |
+| A3 | .4073 / 4.7231 | .7063 / 5.9402 | .7092 / 5.9368 | — |
+| A4 | .5073 / 5.0912 | .7304 / 6.0133 | .7238 / 6.0060 | — |
+| A2 | — | — | — | .7519 / 6.3572 |
+| A0-Graph | — | — | — | .7366 / 5.6697 |
+
+All 24 cells (14 present, 10 blank) match the table exactly. A1 was omitted
+from the old line-chart version; it is included here as its own row (a
+heatmap grid absorbs an extra row for free, and A1 already appears in the
+§7 attacker ladder, so leaving it out here read as inconsistent, not
+deliberate).
+
+**§6 — `tab:cuhk_replication` (lines 997–1000):**
+
+| Row | R1 P_g → R2 P_g | R1 vRPI2 → R2 vRPI2 |
+|---|---|---|
+| Market A0 | .197 → .547 | .873 → 4.966 |
+| Market A3 | .368 → .691 | 5.198 → 5.943 |
+| CUHK03 A0 | .226 → .399 | .530 → 3.325 |
+| CUHK03 A3 | .313 → .502 | 4.549 → 4.977 |
+
+All 8 pairs match the table exactly; row order matches the paper's table
+order and is identical between the two panels.
+
+### Ramp / colour
+
+Both new figures use a single-hue sequential ramp built by scaling navy's own
+CMYK components by t = 0.2, 0.4, 0.6, 0.8, 1.0 (pure tint ladder, same hue,
+no new colour): `navyramp1`..`navyramp4` newly defined, `navyramp5` is
+`\colorlet` to the existing `navy` (not redefined, reused exactly). Heatmap
+buckets were assigned by linear min-max normalization *within each metric*,
+using only the present values (P_guess: min .1600 @A1/R1, max .7529 @A0/R3;
+vRPI2: min 1.6561 @A1/R1, max 6.3572 @A2/R4) — the resulting concentration of
+cells in the top bucket after R2 is the correct visual read of the
+convergence the redesign was meant to surface, not a defect. Blank/no-value
+cells use a separate hue-free `heatempty` (K-only pale gray, cmyk
+0,0,0,0.06) with an en-dash, so "no data" cannot be misread as "low value."
+Dumbbell dots reuse `navyramp2` (light = R1) and `navy`/`navyramp5` (dark =
+R2) — the same two ramp steps used in the §5 legend, so the poster's two
+redesigned charts read as one system. Zero RGB anywhere (build check 5 is
+green: 0 painted rg/RG ops).
+
+### Contrast handling
+
+Cell text flips to white starting at bucket 3 (t=0.6) and stays white through
+bucket 5 (navy, t=1.0); buckets 1–2 and the empty/gray cells keep dark navy
+text. Checked by rendering at 150 dpi and pixel-inspecting the lightest cell
+(A1/R1 `.1600`, bucket 1, dark-on-light — legible) and a representative
+mid-ramp cell (A0/R1 vRPI2 `4.3319`, bucket 3, white-on-medium-navy —
+legible) directly; the darkest bucket (navy, bucket 5) is the poster's
+existing navy swatch used everywhere else with white text, already known-good.
+
+### Bugs found and fixed during this pass (all caught only by rendering)
+
+1. **`\rx1`/`\rx2` are not valid TeX control-word names.** Control words are
+   letters-only; `\pgfmathsetmacro{\rx1}{...}` tokenizes as macro `\rx`
+   followed by a stray literal character `1`, so `\rx1` and `\rx2` both
+   silently clobbered the same macro `\rx`, and the trailing digit leaked
+   into the typeset output as garbled overlapping digits with every dumbbell
+   arrow collapsing onto a single point. Fixed by renaming to letters-only
+   `\rxone`/`\rxtwo`. (The §5 heatmap macro used `\cx`/`\cy` throughout and
+   never hit this.)
+2. Two-line row labels (`Market\\A0`) were taller than the row pitch, so
+   adjacent rows' labels overlapped — switched to a single-line label
+   (`Market A0`).
+3. R1/R2 value labels both anchored directly above their dots collided
+   whenever the two dots were close together (small R1→R2 gap, e.g. Market
+   A3 vRPI2 5.198→5.943 or CUHK03 A3 4.549→4.977) — fixed by flanking the
+   labels outward (R1 label anchored south-east of its dot, R2 label
+   anchored south-west of its dot) so they diverge instead of colliding
+   regardless of gap size.
+4. The legend's R2 marker sat close enough to the "R1" text to visually
+   crowd it — widened the legend spacing.
+5. The `$vRPI_2$` axis-title touched the "4" tick label in the right panel —
+   increased the vertical gap between tick labels and the axis title.
+
+### Visual verification (rendered from `6474_Joshi_1400x1000mm.pdf` at 150 dpi)
+
+- §5: both heatmaps read cleanly — every present cell shows its exact value
+  from the paper; dark cells (buckets 3–5) have white text, light cells
+  (buckets 1–2) have dark navy text, all legible at this zoom; blank cells
+  are visibly pale gray with an en-dash, clearly distinct from the bluish
+  data cells (not readable as zero); the ramp legend (pale→dark, "low"/
+  "high") renders under each panel.
+- §6: all four rows are readable in both panels with no label collisions;
+  every connector arrow points right (Market A0, Market A3, CUHK03 A0,
+  CUHK03 A3, in both P_guess and vRPI2); light/dark dot shading is
+  unambiguous; row order matches between panels.
+- Both boxes fit inside their original section-box outlines with no
+  spillover into section 7 below; `build.ps1`'s Overfull/Underfull check and
+  page count (1) both stayed green throughout.
+- Compared with the old line charts: the §5 convergence band (A0/A3/A4
+  merging into one line after R2) is now three distinct-but-similarly-dark
+  cells with distinct printed numbers, instead of an overlapping visual
+  knot; the §6 near-collision at R2 (Market A0 4.966 vs CUHK03 A3 4.977) is
+  now two separate rows with no shared geometry at all.
