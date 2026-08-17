@@ -1,0 +1,6 @@
+*.aux
+*.log
+build_pass1.log
+build_pass2.log
+check_render-*.png
+check_decompressed.ps
