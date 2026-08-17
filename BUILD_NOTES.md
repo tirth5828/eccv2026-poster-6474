@@ -640,3 +640,179 @@ DPI full-page, plus each new diagram at 150 DPI. Observed:
   exit 0, all checks green including MediaBox/TrimBox/BleedBox geometry,
   crop marks at all four corners, embedded and subsetted fonts, zero RGB
   paint operators, and Katz logo DPI).
+
+## Type scale unification
+
+Baseline commit for this pass: `c3384c2`. Brief: "there are like many
+different text sizes in poster, making it uniform and decrease the
+variations." The poster had **20 distinct font sizes** (28 `\fontsize`
+call sites total, including the 9 named-macro definitions), many of them
+accidental near-duplicates left over from an earlier x1.296 rescale
+(25.92 / 25.272 / 24.624 all read as the same size; 40.176 / 39.96 read
+as the same size; 30.456 / 29.7 read as the same size).
+
+### The 5-step scale
+
+```
+\newcommand{\fsTitle}{\fontsize{75}{82}}  % main poster title only
+\newcommand{\fsH1}{\fontsize{40}{47}}  -> renamed \fsHone (see note below)
+\newcommand{\fsH2}{\fontsize{30}{36}}  -> renamed \fsHtwo (see note below)
+\newcommand{\fsBody}{\fontsize{23}{28}}
+\newcommand{\fsSmall}{\fontsize{19}{23}}
+```
+
+**Naming note:** the brief's suggested token names `\fsH1`/`\fsH2` are not
+valid LaTeX control words — TeX control words are letters-only, so
+`\fsH1` lexes as `\fsH` followed by a literal character `1`, not as one
+command. Both `\newcommand{\fsH1}` definitions silently collided/broke,
+and every call site threw `Undefined control sequence`, which cascaded
+into a `Missing \begin{document}` error and pushed the entire poster onto
+a spurious second page. Fixed by renaming the two tokens to
+**`\fsHone`** and **`\fsHtwo`** (all-letter names) everywhere. Functionally
+identical to the spec's H1/H2 roles; only the token spelling changed.
+
+### Old size -> new token mapping
+
+| Old macro / literal size | Occurrences | New token | Role |
+|---|---|---|---|
+| `\titlefont` (75.168/81.648) | 1 | `\fsTitle` (75/82) | Main poster title |
+| `\subtitlefont` (40.176/46.656) | 1 | `\fsHone` (40/47) | Subtitle |
+| literal 39.96/47.52 (section-10 headings) | 3 | `\fsHone` | "Contribution" / "Empirical signal" / "Limitation" headings |
+| header badge "ECCV" (45.36/51.84) | 1 | `\fsHone` | Header navy badge, line 1 |
+| `\authorfont` (36.288/42.768) | 1 | `\fsHtwo` (30/36) | Author line |
+| `sectionbox` `fonttitle` (30.456/35.64) | 1 | `\fsHtwo` | Section tab titles (1.-9.) |
+| header badge "2026" (32.4/38.88) | 1 | `\fsHtwo` | Header navy badge, line 2 |
+| `\affilfont` (25.272/30.456) | 1 | `\fsBody` (23/28) | Affiliation / email line |
+| `\bodyfont` (25.92/31.104) | 1 | `\fsBody` | Document default body font; attacker-ladder A0-A4 box labels |
+| `\smallbody` (22.81/27.216) | 1 | `\fsBody` | All in-box body paragraphs (sections 1,3,4,6,7,8,9) |
+| literal 26.568/32.141 (claim/banner box) | 1 | `\fsBody` | "Main message" banner text |
+| literal 29.7/36.18 (section-10 bodies) | 3 | `\fsBody` | Contribution/Empirical-signal/Limitation box bodies |
+| literal 23.328/27 (diagram A panel labels) | 1 | `\fsBody` | Sketch-panel R1-R4 labels |
+| literal 21.384/25.92 (diagram B callout) | 1 | `\fsBody` | "$Z_{1:T}=\dots$" bold callout |
+| literal 23.328/28.512 (footer name/title) | 2 | `\fsBody` | Footer name line, footer paper-title line |
+| literal 24.624/29.808 (footer title) | 1 | `\fsBody` | Footer paper-title line |
+| `\tinybody` (18.792/22.032) | 1 | `\fsSmall` (19/23) | Small diagram callouts/legends |
+| `\tablefont` (19.051/22.162) | 1 | `\fsSmall` | Table text (sections 4, 9) |
+| `\captionfont` (17.885/20.736) | 1 | `\fsSmall` | All figure/diagram captions |
+| literal 20.088/23.328 (diagram B node default) | 1 | `\fsSmall` | R1-R4 channel-box text |
+| literal 20.736/25.92, 20.736/24.624, 18.792/23.328 (footer secondary lines) | 3 | `\fsSmall` | Footer affiliation / email / "Corresponding author" |
+
+All legacy macro names (`\titlefont`, `\subtitlefont`, `\authorfont`,
+`\affilfont`, `\bodyfont`, `\smallbody`, `\tinybody`, `\tablefont`,
+`\captionfont`) are kept as thin aliases onto the 5 tokens (same trailing
+`\bfseries`/`\selectfont`/`\color` as before, size swapped), so no call
+site had to change wording or structure — only the `\fontsize{}{}`
+argument changed. `assets/fig_release_trends_vector.tex` and
+`assets/fig_replication_vector.tex` use pgfplots' relative sizes
+(`\normalsize`, `\Large`) rather than literal `\fontsize`, so they were
+not part of the 20-size inventory and were left untouched (no plotted
+data or tick/label sizing was touched, per the constraint on those two
+files).
+
+### Final inventory
+
+```
+grep -oE '\fontsize\{[0-9.]+\}\{[0-9.]+\}' *.tex assets/*.tex | sort | uniq -c
+      1 fontsize{19}{23}
+      1 fontsize{23}{28}
+      1 fontsize{30}{36}
+      1 fontsize{40}{47}
+      1 fontsize{75}{82}
+```
+Exactly **5 distinct sizes** remain (each appearing once, in the 5 token
+definitions; every other call site now references a token, not a literal
+size). Down from 20 distinct sizes / 28 literal `\fontsize` call sites.
+
+### Reflow fallout and fix (overflow found by rendering, not by build.ps1)
+
+The brief warned that `\fsBody` (23pt) is close to the old `\smallbody`
+(22.81pt) so most body text "barely moves" — true for the *font size*,
+but its *leading* also grew slightly (28pt vs 27.216pt), and that leading
+increase applies to dozens of body-text lines across the whole poster.
+Combined with `\fsSmall`'s leading growing versus `\tinybody`/`\captionfont`
+(23pt vs 22.032pt/20.736pt) across ~20 caption/label lines, the net height
+change was a small *increase*, not the expected decrease from the
+larger-macro shrinks (section-10 bodies 29.7->23, author line 36.288->30).
+
+This didn't show up in any `build.ps1` check (no Overfull `\vbox` was ever
+reported), but rendering the full page at 300 DPI and inspecting the
+footer band pixel-by-pixel showed the whole document spilling past
+`\textheight`: the first build after the raw token swap pushed all content
+onto a spurious second page (the `\fsH1`/`\fsH2` bug above); after fixing
+that, the single-page build still had the footer's second line (affiliation
+/ email / "Corresponding author") rendering *below the visible page* —
+i.e. genuinely invisible, not just tight. Checking the original,
+pre-existing (`c3384c2`) PDF the same way showed this was already a
+latent bug: the footer band there also touched `PDFy=0` (the physical
+media edge) with **zero clearance from the trim line**, and its own
+second line was already being clipped by the page boundary — nobody had
+caught it because it's invisible at normal preview zoom and outside every
+automated check in `build.ps1`.
+
+Fixed by adjusting spacing only (no sixth font size introduced, no
+wording changed):
+- `\parskip`: `0.15in` -> `0.07in`
+- the 7 inter-section-box `\vspace{0.1904in}` gaps (columns 1-3) -> `0.13in`
+- header inter-line gaps (title-to-subtitle `0.2539in` -> `0.15in`;
+  subtitle-to-author `0.3491in` -> `0.2in`)
+- section-10 tcolorbox fixed `height=3.4in` -> `2.6in` (was leaving
+  ~30-40% empty space at the bottom of all 3 boxes at the new, smaller
+  23pt body size — reducing it also improved visual balance)
+- section-10 heading-to-body gap `\vspace{0.1495in}` -> `0.1in`, and the
+  intra-box paragraph gap `\vspace{0.253in}` -> `0.15in` (x3 each)
+- the `\vspace{0.2222in}` before section 10 -> `0.15in`, and the
+  `\vspace{0.1495in}` before the footer -> `0.06in`
+- the footer `tcolorbox`'s own `top=`/`bottom=` padding: `0.108in` ->
+  `0.03in`
+
+Net result: the footer's bottom edge moved from **0pt clearance (flush
+with the physical media edge, second line invisible)** to **~15.3pt
+(~5.4mm) clearance above the trim line**, with both footer text lines
+fully visible in every column. This is less than the poster's own 10mm
+clearance convention used elsewhere (`\textheight` vs. the 25mm margin
+is a fixed relationship that these spacing edits could not move past a
+point — further probing showed the footer box's top position is
+effectively pinned by the page geometry, not by upstream paragraph
+spacing, so additional `\parskip`/`\vspace` cuts stopped helping once the
+overflow itself was resolved), but it is a clear, verified improvement
+over both the immediate post-rename regression and the original,
+already-accepted PDF. Flagging for the author: ~5.4mm is a thinner
+safety margin than the rest of the poster's 10mm convention: if the print
+vendor's trim registration has more than ~5mm tolerance, worth a final
+visual check on the physical proof.
+
+### Before / after visual comparison (type scale pass)
+
+Rendered the pre-typography-pass PDF (`c3384c2`) and the final PDF full-page
+at 40 DPI and each of the 3 columns at 150 DPI, side by side:
+
+- The 20-size version reads as visibly inconsistent up close: the
+  section-10 box headings, the header "ECCV" badge, and the footer paper
+  title are all subtly different sizes from their nearest neighbours even
+  though they play the same visual role. The 5-size version reads as
+  clearly tiered: one title size, one heading size (subtitle/section
+  tabs/author), one body size used everywhere text is prose, one small
+  size used everywhere text is a label/caption/table/footnote.
+- Section-10 boxes: at the old 29.7pt body size the three boxes
+  (Contribution / Empirical signal / Limitation) had noticeably more
+  bottom whitespace than the rest of the poster's boxes; at the new 23pt
+  size (`\fsBody`, matching every other body paragraph in the poster) plus
+  the reduced `height=2.6in`, all three boxes are now visually consistent
+  with the tightness of sections 1-9.
+- No diagram changed size or content: diagrams A/B/C (posterior-sketch
+  strip, anonymity-budget bars, attacker ladder) still read correctly —
+  labels are legible, no collisions, only their font now matches
+  `\fsBody`/`\fsSmall` instead of one-off literal sizes.
+- Footer: previously showed one visible line per column with the second
+  line (affiliation/email/"Corresponding author") invisible below the
+  page edge; now shows both lines in all 3 columns, still clearly
+  smaller/secondary (`\fsSmall`) versus the bold primary line
+  (`\fsBody`).
+- `build.ps1` re-run clean after the final spacing fix: exit 0, all
+  checks green (MediaBox/TrimBox/BleedBox geometry, crop marks at all 4
+  corners, fonts embedded+subsetted with no Type 3 bitmap fonts, zero RGB
+  paint operators, Katz logo 204.5 DPI, no Overfull/Underfull hbox or
+  vbox beyond 5pt). Minimum rendered text size is 19pt (`\fsSmall`) —
+  used only for tables, captions, diagram labels, and footer secondary
+  text, matched to the old `\tablefont` (19.051pt), so legibility at
+  poster-viewing distance is unchanged from the original design.

@@ -23,7 +23,7 @@
 \usepgfplotslibrary{groupplots}
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{0.15in}
+\setlength{\parskip}{0.07in}
 
 % ---------- TrimBox / BleedBox (PDF units = points, 1mm = 72/25.4pt) ----------
 % Media: 4053.5433 x 2919.6850 pt (1430x1030mm)
@@ -47,20 +47,29 @@
 \definecolor{muted}{cmyk}{0.246,0.149,0.000,0.475}
 
 % ---------- Font helpers ----------
-\newcommand{\titlefont}{\fontsize{75.168}{81.648}\bfseries\selectfont}
-\newcommand{\subtitlefont}{\fontsize{40.176}{46.656}\bfseries\selectfont}
-\newcommand{\authorfont}{\fontsize{36.288}{42.768}\bfseries\selectfont}
-\newcommand{\affilfont}{\fontsize{25.272}{30.456}\selectfont}
-\newcommand{\bodyfont}{\fontsize{25.92}{31.104}\selectfont}
-\newcommand{\smallbody}{\fontsize{22.81}{27.216}\selectfont}
-\newcommand{\tinybody}{\fontsize{18.792}{22.032}\selectfont}
-\newcommand{\tablefont}{\fontsize{19.051}{22.162}\selectfont}
-\newcommand{\captionfont}{\fontsize{17.885}{20.736}\selectfont\color{muted}}
+% Unified 5-step type scale (typography-consistency pass, 2026-08-17):
+% collapses 20 near-duplicate rescaled sizes down to 5 tokens. See
+% BUILD_NOTES.md "Type scale unification" for the full old->new mapping.
+\newcommand{\fsTitle}{\fontsize{75}{82}}  % main poster title only
+\newcommand{\fsHone}{\fontsize{40}{47}}   % subtitle, section-10 box headings
+\newcommand{\fsHtwo}{\fontsize{30}{36}}   % section tab titles, author line
+\newcommand{\fsBody}{\fontsize{23}{28}}   % all body text, banner text, affiliation, section-10 box bodies
+\newcommand{\fsSmall}{\fontsize{19}{23}}  % tables, captions, diagram labels, footer secondary text
+% Legacy macro names kept as aliases onto the 5-step scale so no call site breaks.
+\newcommand{\titlefont}{\fsTitle\bfseries\selectfont}
+\newcommand{\subtitlefont}{\fsHone\bfseries\selectfont}
+\newcommand{\authorfont}{\fsHtwo\bfseries\selectfont}
+\newcommand{\affilfont}{\fsBody\selectfont}
+\newcommand{\bodyfont}{\fsBody\selectfont}
+\newcommand{\smallbody}{\fsBody\selectfont}
+\newcommand{\tinybody}{\fsSmall\selectfont}
+\newcommand{\tablefont}{\fsSmall\selectfont}
+\newcommand{\captionfont}{\fsSmall\selectfont\color{muted}}
 
 \tcbset{enhanced,boxsep=0.054in,left=0.156in,right=0.156in,top=0.108in,bottom=0.108in,arc=0.072in,outer arc=0.072in,colback=white,colframe=lineblue,boxrule=0.9pt}
 \newtcolorbox{sectionbox}[2][]{
   title={#2}, coltitle=white, colbacktitle=navy,
-  fonttitle=\fontsize{30.456}{35.64}\bfseries\selectfont,
+  fonttitle=\fsHtwo\bfseries\selectfont,
   attach boxed title to top left={yshift=-0.012in,xshift=0in},
   boxed title style={sharp corners,arc=0.054in,outer arc=0.054in,boxrule=0pt,left=0.144in,right=0.144in,top=0.066in,bottom=0.0624in,colback=navy},
   top=0.264in,#1}
@@ -92,25 +101,25 @@
 % ---------- Header ----------
 \begin{minipage}[c]{0.105\textwidth}
 \centering
-\begin{tcolorbox}[width=4.26in,height=2.7in,colback=navy,colframe=navy,arc=0.192in,halign=center,valign=center]
-{\fontsize{45.36}{51.84}\bfseries\color{white}ECCV}\par
-{\fontsize{32.4}{38.88}\bfseries\color{white}2026}
+\begin{tcolorbox}[width=4.26in,height=2.6in,colback=navy,colframe=navy,arc=0.192in,halign=center,valign=center]
+{\fsHone\bfseries\color{white}ECCV}\par
+{\fsHtwo\bfseries\color{white}2026}
 \end{tcolorbox}
 \end{minipage}\hfill
 \begin{minipage}[c]{0.74\textwidth}
   \centering
   {\titlefont\color{navy} Compositional Non-Face Re-Identification Pressure} \\
   {\titlefont\color{navy} under Cumulative Vision Releases}\par
-  \vspace{0.2539in}
+  \vspace{0.15in}
   {\subtitlefont\color{navy2} Auditing the ``leaky bucket'' effect in vision benchmarks}\par
-  \vspace{0.3491in}
+  \vspace{0.2in}
   {\authorfont Tirth Joshi \;\textcolor{muted}{\textbullet}\; Honggang Wang$^{\ast}$} \\
   {\affilfont\color{graytext}Katz School of Science and Health, Yeshiva University, New York, USA}\par
   {\affilfont\texttt{tjoshi1@mail.yu.edu} \quad \texttt{honggang.wang@yu.edu}}
 \end{minipage}\hfill
 \begin{minipage}[c]{0.13\textwidth}
   \raggedleft
-  \begin{tcolorbox}[width=4.98in,height=2.7in,colback=white,colframe=navy2,boxrule=1.68pt,arc=0.192in,halign=center,valign=center]
+  \begin{tcolorbox}[width=4.98in,height=2.6in,colback=white,colframe=navy2,boxrule=1.68pt,arc=0.192in,halign=center,valign=center]
   \typeout{POSTER-CHECK: katz-logo placed-width-pt=[\the\dimexpr 4.4in\relax]}%
   \includegraphics[width=4.4in]{assets/katz-logo-cmyk.pdf}
   \end{tcolorbox}
@@ -119,10 +128,10 @@
 \vspace{0.0794in}
 \begin{claimbox}
 \centering
-\fontsize{26.568}{32.141}\selectfont
+\fsBody\selectfont
 \textbf{Main message.} Removing faces does not make identity risk ``reset'' with each new release. Dataset expansions, checkpoints, embeddings, indices, and metadata accumulate as side information. We define \textbf{$vRPI_\alpha$}, prove that true-posterior pressure is non-decreasing under added releases, and show large empirical pressure growth on face-masked Re-ID benchmarks.
 \end{claimbox}
-\vspace{0.1904in}
+\vspace{0.13in}
 
 % ---------- Main 3-column grid ----------
 \begin{minipage}[t]{0.292\textwidth}
@@ -170,7 +179,7 @@ P_{\mathrm{guess}}(U\mid Z_{1:T})
         \draw[fill=navy2!28, draw=navy2, line width=0.4pt] (\bx,0) rectangle ({\bx+\barw},\bh);
       \fi
     }
-    \node[font=\fontsize{23.328}{27}\bfseries\selectfont, color=navy] at ({2*\step+\barw/2},{\maxh+0.32}) {#4};
+    \node[font=\fsBody\bfseries\selectfont, color=navy] at ({2*\step+\barw/2},{\maxh+0.32}) {#4};
     \node[font=\tinybody, align=center] at ({2*\step+\barw/2},-0.42) {$P_{\mathrm{guess}}=#5$\\\textcolor{muted}{(#6)}};
   \end{scope}
 }
@@ -183,10 +192,10 @@ P_{\mathrm{guess}}(U\mid Z_{1:T})
 {\captionfont Sketch of $\Pr(U\mid Z_{1:t})$ concentrating across releases -- bars are illustrative, not measured. Measured $P_{\mathrm{guess}}$ is printed below each panel (Table, \S4).}
 \end{sectionbox}
 
-\vspace{0.1904in}
+\vspace{0.13in}
 \begin{sectionbox}{2. Release-as-Channel Formulation}
 \centering
-\begin{tikzpicture}[x=1.2in,y=1.2in,>=Latex, every node/.style={font=\fontsize{20.088}{23.328}\selectfont}]
+\begin{tikzpicture}[x=1.2in,y=1.2in,>=Latex, every node/.style={font=\fsSmall\selectfont}]
 \node[draw=navy2,very thick,rounded corners=4pt,fill=lightblue,minimum width=2.904in,minimum height=1.464in,align=center] (r1) at (0,0) {\textbf{R1}\\Sparse exposure\\encoder $E_1$};
 \node[draw=green,very thick,rounded corners=4pt,fill=softgreen,minimum width=2.904in,minimum height=1.464in,align=center] (r2) at (3.0,0) {\textbf{R2}\\Full exposure\\$+E_2$};
 \node[draw=orange,very thick,rounded corners=4pt,fill=softorange,minimum width=2.904in,minimum height=1.464in,align=center] (r3) at (6.0,0) {\textbf{R3}\\Generic channel\\$+E_3$};
@@ -194,7 +203,7 @@ P_{\mathrm{guess}}(U\mid Z_{1:T})
 \draw[->,very thick,color=muted] (r1)--(r2);
 \draw[->,very thick,color=muted] (r2)--(r3);
 \draw[->,very thick,color=muted] (r3)--(r4);
-\node[align=center,text=navy,font=\fontsize{21.384}{25.92}\bfseries] at (4.55,-1.15) {$Z_{1:T}=(Z_1,\ldots,Z_T)$ accumulates side information};
+\node[align=center,text=navy,font=\fsBody\bfseries] at (4.55,-1.15) {$Z_{1:T}=(Z_1,\ldots,Z_T)$ accumulates side information};
 \node[draw=navy,thick,rounded corners=5pt,fill=white,minimum width=9.36in,minimum height=0.9in,align=center] (post) at (4.55,-2.15) {$\Pr(U\mid Z_{1:T})$ becomes the object of the privacy audit};
 \draw[->,very thick,color=navy] (4.55,-1.45)--(post.north);
 \end{tikzpicture}
@@ -203,7 +212,7 @@ P_{\mathrm{guess}}(U\mid Z_{1:T})
 {\captionfont Each disclosure is modeled as a channel $Z_t\sim K_t(\cdot\mid\widetilde X)$. The framework is release-sequence aware rather than tied to one Re-ID model or anonymizer.}
 \end{sectionbox}
 
-\vspace{0.1904in}
+\vspace{0.13in}
 \begin{sectionbox}{3. $vRPI_\alpha$: Metric and Core Theory}
 \smallbody
 \mhead{Rényi pressure index.} For $\alpha>1$, using Arimoto conditional Rényi entropy,
@@ -304,7 +313,7 @@ R4 & A0-Graph & .7366 & 5.6697 & kNN-graph pathway\\
 {\captionfont Mean over 3 seeds. A3 independently shows the same R1$\rightarrow$R2 pattern ($P_{\mathrm{guess}}$: .407$\rightarrow$.706; $vRPI_2$: 4.723$\rightarrow$5.940). Empirical plug-in estimates can fluctuate with attacker/calibration even though Theorem 1 is a true-posterior statement.}
 \end{sectionbox}
 
-\vspace{0.1904in}
+\vspace{0.13in}
 \begin{sectionbox}{5. Release Trend: The R1$\rightarrow$R2 Jump Dominates}
 \centering
 \typeout{POSTER-CHECK: fig-release-trends placed-linewidth-pt=[\the\linewidth]}%
@@ -314,7 +323,7 @@ R4 & A0-Graph & .7366 & 5.6697 & kNN-graph pathway\\
 {\captionfont The exposure expansion is the clearest compositional effect. R2$\rightarrow$R3 is stable under validation-tuned fusion and temperature scaling. R4 demonstrates artifact-specific leakage through the prototype/index specialist and graph-exploiting attacker.}
 \end{sectionbox}
 
-\vspace{0.1904in}
+\vspace{0.13in}
 \begin{sectionbox}{6. Replication + Non-Face Stress Test}
 \centering
 \typeout{POSTER-CHECK: fig-replication placed-linewidth-pt=[\the\linewidth]}%
@@ -384,7 +393,7 @@ R4 & A0-Graph & .7366 & 5.6697 & kNN-graph pathway\\
 {\captionfont Every attacker maps scores into a posterior over the same identity universe before entropy computation.}
 \end{sectionbox}
 
-\vspace{0.1904in}
+\vspace{0.13in}
 \begin{sectionbox}{8. Diagnostics: Dependence, Calibration, Priors}
 \smallbody
 \mhead{Dependence overlap.} Conditional independence gives an ideal additive benchmark, not a claim about real CV releases. On Market,
@@ -403,7 +412,7 @@ quantifying redundancy among correlated release channels.
 \mhead{Non-uniform identity priors.} For a Zipf$(s)$ prior, normalizing by prior entropy instead of $\log N$, the R1$\rightarrow$R2 increment shrinks from $3.818$ at $s=0$ to $.123$ at $s=1.5$: a concentrated prior leaves less anonymity to erode.
 \end{sectionbox}
 
-\vspace{0.1904in}
+\vspace{0.13in}
 \begin{sectionbox}{9. What the Framework Adds}
 \smallbody
 \mhead{Not another Re-ID model.} $vRPI_\alpha$ audits release-induced privacy pressure; rank/mAP remains a retrieval-utility metric -- different questions.
@@ -448,50 +457,50 @@ DP / attribute inference & Worst-case stability / bound & Via composition\\
 
 \end{minipage}
 
-\vspace{0.2222in}
+\vspace{0.15in}
 \begin{sectionbox}{10. Final Contribution, Empirical Signal, and Limitation}
 \begin{minipage}[t]{0.318\linewidth}
-\begin{tcolorbox}[height=3.4in,colback=lightblue,colframe=navy2,left=0.168in,right=0.168in,top=0.144in,bottom=0.12in]
-{\fontsize{39.96}{47.52}\bfseries\color{navy}Contribution}\par\vspace{0.1495in}
-{\fontsize{29.7}{36.18}\selectfont
-A \textbf{release-sequence privacy formalism}, $vRPI_\alpha$, from Arimoto conditional Rényi entropy.\par\vspace{0.253in}
+\begin{tcolorbox}[height=2.6in,colback=lightblue,colframe=navy2,left=0.168in,right=0.168in,top=0.144in,bottom=0.12in]
+{\fsHone\bfseries\color{navy}Contribution}\par\vspace{0.1in}
+{\fsBody\selectfont
+A \textbf{release-sequence privacy formalism}, $vRPI_\alpha$, from Arimoto conditional Rényi entropy.\par\vspace{0.15in}
 \textbf{Theory:} monotonicity under added side information, a Bayes-guessing bridge, an additive benchmark, ablation monotonicity, and plug-in stability.}
 \end{tcolorbox}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.318\linewidth}
-\begin{tcolorbox}[height=3.4in,colback=softgreen,colframe=green,left=0.168in,right=0.168in,top=0.144in,bottom=0.12in]
-{\fontsize{39.96}{47.52}\bfseries\color{navy}Empirical signal}\par\vspace{0.1495in}
-{\fontsize{29.7}{36.18}\selectfont
-On face-masked Market-1501, \textbf{exposure expansion dominates}: A0 $P_{\mathrm{guess}}$ .288$\rightarrow$.749, $vRPI_2$ 4.332$\rightarrow$6.212.\par\vspace{0.253in}
+\begin{tcolorbox}[height=2.6in,colback=softgreen,colframe=green,left=0.168in,right=0.168in,top=0.144in,bottom=0.12in]
+{\fsHone\bfseries\color{navy}Empirical signal}\par\vspace{0.1in}
+{\fsBody\selectfont
+On face-masked Market-1501, \textbf{exposure expansion dominates}: A0 $P_{\mathrm{guess}}$ .288$\rightarrow$.749, $vRPI_2$ 4.332$\rightarrow$6.212.\par\vspace{0.15in}
 CUHK03 preserves the paired R1$\rightarrow$R2 direction; prototype/index and kNN-graph releases add artifact-specific leakage.}
 \end{tcolorbox}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.318\linewidth}
-\begin{tcolorbox}[height=3.4in,colback=softorange,colframe=orange,left=0.168in,right=0.168in,top=0.144in,bottom=0.12in]
-{\fontsize{39.96}{47.52}\bfseries\color{navy}Limitation}\par\vspace{0.1495in}
-{\fontsize{29.7}{36.18}\selectfont
-Evaluation is theory-aligned and closed-world. $vRPI_\alpha$ is an \textbf{audit statistic, not a mitigation}.\par\vspace{0.253in}
+\begin{tcolorbox}[height=2.6in,colback=softorange,colframe=orange,left=0.168in,right=0.168in,top=0.144in,bottom=0.12in]
+{\fsHone\bfseries\color{navy}Limitation}\par\vspace{0.1in}
+{\fsBody\selectfont
+Evaluation is theory-aligned and closed-world. $vRPI_\alpha$ is an \textbf{audit statistic, not a mitigation}.\par\vspace{0.15in}
 Next: \textbf{open-set posteriors, realistic anonymizers, more datasets/video, and longer real release sequences.}}
 \end{tcolorbox}
 \end{minipage}
 \end{sectionbox}
 
 \vfill
-\vspace{0.1495in}
-\begin{tcolorbox}[enhanced,colback=navy,colframe=navy,boxrule=0pt,arc=0in,outer arc=0in,left=0.264in,right=0.264in,top=0.108in,bottom=0.108in]
+\vspace{0.06in}
+\begin{tcolorbox}[enhanced,colback=navy,colframe=navy,boxrule=0pt,arc=0in,outer arc=0in,left=0.264in,right=0.264in,top=0.03in,bottom=0.03in]
 \begin{minipage}[c]{0.30\textwidth}
-  {\fontsize{23.328}{28.512}\bfseries\color{white} Tirth Joshi \;\textcolor{lineblue}{\textbullet}\; Honggang Wang} \\
-  {\fontsize{20.736}{25.92}\selectfont\color{white}Katz School of Science and Health, Yeshiva University}
+  {\fsBody\bfseries\color{white} Tirth Joshi \;\textcolor{lineblue}{\textbullet}\; Honggang Wang} \\
+  {\fsSmall\selectfont\color{white}Katz School of Science and Health, Yeshiva University}
 \end{minipage}\hfill
 \begin{minipage}[c]{0.46\textwidth}
   \centering
-  {\fontsize{24.624}{29.808}\bfseries\color{white} Compositional Non-Face Re-Identification Pressure under Cumulative Vision Releases}\par
-  {\fontsize{20.736}{24.624}\selectfont\color{white}\texttt{tjoshi1@mail.yu.edu}}
+  {\fsBody\bfseries\color{white} Compositional Non-Face Re-Identification Pressure under Cumulative Vision Releases}\par
+  {\fsSmall\selectfont\color{white}\texttt{tjoshi1@mail.yu.edu}}
 \end{minipage}\hfill
 \begin{minipage}[c]{0.18\textwidth}
   \raggedleft
-  {\fontsize{23.328}{28.512}\bfseries\color{white}ECCV 2026}\par
-  {\fontsize{18.792}{23.328}\selectfont\color{lineblue}$^{\ast}$Corresponding author}
+  {\fsBody\bfseries\color{white}ECCV 2026}\par
+  {\fsSmall\selectfont\color{lineblue}$^{\ast}$Corresponding author}
 \end{minipage}
 \end{tcolorbox}
 
