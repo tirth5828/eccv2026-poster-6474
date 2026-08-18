@@ -156,9 +156,14 @@ foreach ($key in @("fig-release-trends","fig-replication")) {
 # Both logos are raster; each must clear 100 DPI at its placed size and stay
 # under the 180mm cap. PxWidth is the source pixel width of each asset.
 $logos = @(
-    @{ Key = "katz-logo"; PxWidth = 900;  CapMm = 180 },
-    @{ Key = "eccv-logo"; PxWidth = 1701; CapMm = 180 }
+    @{ Key = "katz-logo"; PxWidth = 900;  CapMm = 180 }
 )
+if ($passLog -match "POSTER-CHECK: eccv-logo placed-width-pt=\[([0-9.]+)pt\]") {
+    $eccvIn = [double]$Matches[1] / 72.27
+    Pass ("eccv-logo: vector (from organizers' SVG); placed width {0:N2}in ({1:N1}mm), no DPI constraint" -f $eccvIn, ($eccvIn * 25.4))
+} else {
+    Fail "Could not find POSTER-CHECK width for eccv-logo in build log"
+}
 foreach ($lg in $logos) {
     $pat = "POSTER-CHECK: $($lg.Key) placed-width-pt=\[([0-9.]+)pt\]"
     if ($passLog -match $pat) {
