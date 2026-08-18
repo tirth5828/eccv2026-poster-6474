@@ -305,7 +305,7 @@ Thus higher pressure corresponds to a smaller effective anonymity set and strong
 \textbf{The dominant leak is exposure expansion.} From R1 to R2, retrieval attacker A0 jumps from $P_{\mathrm{guess}}=0.288$ to $0.749$ and $vRPI_2=4.332$ to $6.212$. A3 rises from $0.407$ to $0.706$. R4 then shows that publishable artifacts themselves create exploitable leakage pathways.
 \end{resultbox}
 \vspace{0.0714in}
-\tablefont
+{\tablefont
 \renewcommand{\arraystretch}{1.14}
 \setlength{\tabcolsep}{5.0pt}
 \resizebox{\linewidth}{!}{%
@@ -319,7 +319,7 @@ R3 & A0 & .7529 & 5.9271 & Generic channel; calibrated fusion\\
 R4 & A2 & \textcolor{red}{\textbf{.7519}} & \textcolor{red}{\textbf{6.3572}} & Prototype/index specialist\\
 R4 & A0-Graph & .7366 & 5.6697 & kNN-graph pathway\\
 \bottomrule
-\end{tabular}}
+\end{tabular}}}
 \vspace{0.0317in}
 
 {\captionfont Mean over 3 seeds. A3 independently shows the same R1$\rightarrow$R2 pattern ($P_{\mathrm{guess}}$: .407$\rightarrow$.706; $vRPI_2$: 4.723$\rightarrow$5.940). Empirical plug-in estimates can fluctuate with attacker/calibration even though Theorem 1 is a true-posterior statement.}
@@ -409,7 +409,7 @@ R4 & A0-Graph & .7366 & 5.6697 & kNN-graph pathway\\
 
 \vspace{0.13in}
 \begin{sectionbox}{8. Diagnostics: Dependence, Calibration, Priors}
-\smallbody
+\smallbody\linespread{1.12}\selectfont
 \mhead{Dependence overlap.} Conditional independence gives an ideal additive benchmark, not a claim about real CV releases. On Market,
 \[
 \Delta_{\mathrm{corr},2}
@@ -419,27 +419,27 @@ R4 & A0-Graph & .7366 & 5.6697 & kNN-graph pathway\\
 \]
 quantifying redundancy among correlated release channels.
 
-\vspace{0.0476in}
+\vspace{0.115in}
 \mhead{Temperature calibration.} Across $\theta\in\{.025,.05,.1,.2,.5,1.0\}$, absolute pressure shifts but $\Delta vRPI_2(R2\!-\!R1)$ stays positive throughout: A0 spans $[.781,4.100]$, A3 spans $[.567,.677]$.
 
-\vspace{0.0476in}
+\vspace{0.115in}
 \mhead{Non-uniform identity priors.} For a Zipf$(s)$ prior, normalizing by prior entropy instead of $\log N$, the R1$\rightarrow$R2 increment shrinks from $3.818$ at $s=0$ to $.123$ at $s=1.5$: a concentrated prior leaves less anonymity to erode.
 \end{sectionbox}
 
 \vspace{0.13in}
 \begin{sectionbox}{9. What the Framework Adds}
-\smallbody
+\smallbody\linespread{1.12}\selectfont
 \mhead{Not another Re-ID model.} $vRPI_\alpha$ audits release-induced privacy pressure; rank/mAP remains a retrieval-utility metric -- different questions.
 
-\vspace{0.0476in}
+\vspace{0.115in}
 \mhead{Not a replacement for maximal leakage or DP.} Maximal leakage optimizes adversarial gain per channel; DP gives worst-case stability guarantees. $vRPI_\alpha$ fixes the identity task and measures posterior concentration over a release sequence.
 
-\vspace{0.0476in}
+\vspace{0.115in}
 \mhead{Governance implication.} Privacy review should happen at the \textbf{sequence level}: evaluate planned disclosures together, minimize unnecessary metadata, and treat embedding dumps, prototype banks, and indices as privacy-relevant releases.
 
-\vspace{0.0476in}
+\vspace{0.115in}
 \mhead{Positioning against common criteria.}\par
-\tablefont
+{\tablefont
 \renewcommand{\arraystretch}{1.12}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{lll}
@@ -452,7 +452,7 @@ $vRPI_\alpha$ & Rényi posterior concentration & \textbf{Yes}\\
 Maximal leakage & Worst-case channel gain & Channel-level\\
 DP / attribute inference & Worst-case stability / bound & Via composition\\
 \bottomrule
-\end{tabular}}
+\end{tabular}}}
 
 \vspace{0.0635in}
 \begin{tcolorbox}[colback=softgreen,colframe=green,left=0.12in,right=0.12in,top=0.084in,bottom=0.084in]
@@ -460,7 +460,7 @@ DP / attribute inference & Worst-case stability / bound & Via composition\\
 \textbf{Release hygiene, not surveillance.} Intended use is governance: audit successive disclosures before publication, limit high-leverage artifacts, minimize unnecessary metadata.
 \end{tcolorbox}
 
-\vspace{0.0476in}
+\vspace{0.115in}
 \mhead{Limitations.}
 \begin{itemize}
   \item Closed-world image benchmarks; broader datasets, video, larger scale, and open-set evaluation remain future work.
