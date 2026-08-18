@@ -153,22 +153,30 @@ foreach ($key in @("fig-release-trends","fig-replication")) {
         Fail "Could not find POSTER-CHECK linewidth for $key in build log"
     }
 }
-if ($passLog -match "POSTER-CHECK: katz-logo placed-width-pt=\[([0-9.]+)pt\]") {
-    $logoWidthPt = [double]$Matches[1]
-    $logoWidthIn = $logoWidthPt / 72.27
-    $logoDpi = 900 / $logoWidthIn
-    if ($logoWidthIn -le (180 / 25.4) + 0.01) {
-        Pass ("katz-logo: placed width {0:N2}in ({1:N1}mm) <= 180mm cap" -f $logoWidthIn, ($logoWidthIn * 25.4))
+# Both logos are raster; each must clear 100 DPI at its placed size and stay
+# under the 180mm cap. PxWidth is the source pixel width of each asset.
+$logos = @(
+    @{ Key = "katz-logo"; PxWidth = 900;  CapMm = 180 },
+    @{ Key = "eccv-logo"; PxWidth = 1701; CapMm = 180 }
+)
+foreach ($lg in $logos) {
+    $pat = "POSTER-CHECK: $($lg.Key) placed-width-pt=\[([0-9.]+)pt\]"
+    if ($passLog -match $pat) {
+        $wIn = [double]$Matches[1] / 72.27
+        $dpi = $lg.PxWidth / $wIn
+        if ($wIn -le ($lg.CapMm / 25.4) + 0.01) {
+            Pass ("{0}: placed width {1:N2}in ({2:N1}mm) <= {3}mm cap" -f $lg.Key, $wIn, ($wIn*25.4), $lg.CapMm)
+        } else {
+            Fail ("{0}: placed width {1:N2}in exceeds the {2}mm cap" -f $lg.Key, $wIn, $lg.CapMm)
+        }
+        if ($dpi -ge 100) {
+            Pass ("{0}: {1:N1} DPI (>= 100)" -f $lg.Key, $dpi)
+        } else {
+            Fail ("{0}: {1:N1} DPI (< 100 !)" -f $lg.Key, $dpi)
+        }
     } else {
-        Fail ("katz-logo: placed width {0:N2}in exceeds the 180mm cap" -f $logoWidthIn)
+        Fail "Could not find POSTER-CHECK width for $($lg.Key) in build log"
     }
-    if ($logoDpi -ge 100) {
-        Pass ("katz-logo: {0:N1} DPI (>= 100)" -f $logoDpi)
-    } else {
-        Fail ("katz-logo: {0:N1} DPI (< 100 !)" -f $logoDpi)
-    }
-} else {
-    Fail "Could not find POSTER-CHECK width for katz-logo in build log"
 }
 
 # ---------------------------------------------------------------------------
