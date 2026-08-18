@@ -28,7 +28,7 @@
 % valW must clear the widest R1 value ("5.198") AND leave a visible gap from the
 % row name, otherwise "Market A3" + "5.198" read as one string. axisW is trimmed
 % to hold total picture width ~23 units (see \resizebox note above).
-\def\rowLabelW{3.0}\def\valW{2.2}\def\rowH{1.05}\def\topPad{1.6}\def\axisW{4.6}
+\def\rowLabelW{3.0}\def\valW{0.4}\def\rowH{1.05}\def\topPad{1.6}\def\axisW{6.4}
 
 % plot origin (left edge of the value axis) = row-name column + R1-value column
 \def\plotX{\rowLabelW+\valW}
@@ -64,8 +64,10 @@
   \pgfmathsetmacro{\rxtwo}{#1+\plotX+(#7)*(#2)}
   % column 1: row name, right-aligned against the value column
   \node[anchor=east, font=\fsSmall\selectfont, color=navy] at ({#1+\rowLabelW-0.15},{\ry}) {#4~#5};
-  % column 2: R1 value, right-aligned against the plot origin, muted
-  \node[anchor=east, font=\fsSmall\selectfont, color=muted] at ({#1+\plotX-0.25},{\ry}) {#8};
+  % R1 value sits immediately left of the light dot, mirroring the R2 value at
+  % the dark dot, so each number touches its own end of the line. Safe even when
+  % the arrow is short (CUHK03 A3): the two labels flank the pair outward.
+  \node[anchor=east, font=\fsSmall\selectfont, color=muted] at ({\rxone-0.18},{\ry}) {#8};
   % column 3: the dumbbell
   \draw[navy, line width=1.7pt, -{Latex[length=2.4mm,width=1.8mm]}] (\rxone,\ry) -- (\rxtwo,\ry);
   \draw[fill=navyramp2, draw=navy, line width=0.9pt] (\rxone,\ry) circle (0.13);
@@ -75,22 +77,22 @@
 }
 
 %% ================= Left panel: P_guess =================
-%% scale = axisW / xmax = 4.6 / 0.80 = 5.75
+%% scale = axisW / xmax = 6.4 / 0.80 = 8.0
 \dpanel{0}{Exposure expansion replicates}{0.80}{$P_{guess}$}{0,.2,.4,.6,.8}
-\drow{0}{5.75}{0}{Market}{A0}{0.197}{0.547}{.197}{.547}
-\drow{0}{5.75}{1}{Market}{A3}{0.368}{0.691}{.368}{.691}
-\drow{0}{5.75}{2}{CUHK03}{A0}{0.226}{0.399}{.226}{.399}
-\drow{0}{5.75}{3}{CUHK03}{A3}{0.313}{0.502}{.313}{.502}
+\drow{0}{8.0}{0}{Market}{A0}{0.197}{0.547}{.197}{.547}
+\drow{0}{8.0}{1}{Market}{A3}{0.368}{0.691}{.368}{.691}
+\drow{0}{8.0}{2}{CUHK03}{A0}{0.226}{0.399}{.226}{.399}
+\drow{0}{8.0}{3}{CUHK03}{A3}{0.313}{0.502}{.313}{.502}
 
 %% ================= Right panel: vRPI2 =================
-%% scale = axisW / xmax = 4.6 / 6.6 = 0.69697
+%% scale = axisW / xmax = 6.4 / 6.6 = 0.969697
 % Panel gap must clear the widest left-panel R2 label (".691") from the right
 % panel's first row name ("Market A3"); at 11.2 they touched.
-\def\xR{12.2}
+\def\xR{9.2}
 \dpanel{\xR}{Pressure rises on both datasets}{6.6}{$vRPI_2$}{0,2,4,6}
-\drow{\xR}{0.69697}{0}{Market}{A0}{0.873}{4.966}{.873}{4.966}
-\drow{\xR}{0.69697}{1}{Market}{A3}{5.198}{5.943}{5.198}{5.943}
-\drow{\xR}{0.69697}{2}{CUHK03}{A0}{0.530}{3.325}{.530}{3.325}
-\drow{\xR}{0.69697}{3}{CUHK03}{A3}{4.549}{4.977}{4.549}{4.977}
+\drow{\xR}{0.969697}{0}{ }{ }{0.873}{4.966}{.873}{4.966}
+\drow{\xR}{0.969697}{1}{ }{ }{5.198}{5.943}{5.198}{5.943}
+\drow{\xR}{0.969697}{2}{ }{ }{0.530}{3.325}{.530}{3.325}
+\drow{\xR}{0.969697}{3}{ }{ }{4.549}{4.977}{4.549}{4.977}
 
 \end{tikzpicture}

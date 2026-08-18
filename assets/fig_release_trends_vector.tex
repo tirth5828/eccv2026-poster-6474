@@ -22,6 +22,9 @@
 % @A2/R4), so shade is comparable within a panel. Text colour flips to white
 % starting at bucket 3 for legibility on the darker fills (checked by render).
 \begin{tikzpicture}
+% cell values only -- deliberately below \fsSmall so 6-digit numbers do not fill
+% their cells edge-to-edge; row/column headers stay at \fsSmall.
+\providecommand{\fsCell}{\fontsize{15}{18}\selectfont}
 \def\cellW{2.0}\def\cellH{0.62}\def\labelW{2.5}\def\headerH{0.55}
 \def\gridTop{-1.12}
 
@@ -31,22 +34,22 @@
   \pgfmathsetmacro{\cy}{\gridTop-(#2)*\cellH}%
   \ifcase#4
     \draw[fill=heatempty, draw=white, line width=1.0pt] (\cx,\cy) rectangle ++(\cellW-0.05,-(\cellH-0.05));
-    \node[font=\fsSmall\selectfont, color=muted] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
+    \node[font=\fsCell\selectfont, color=muted] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
   \or
     \draw[fill=navyramp1, draw=white, line width=1.0pt] (\cx,\cy) rectangle ++(\cellW-0.05,-(\cellH-0.05));
-    \node[font=\fsSmall\selectfont, color=navy] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
+    \node[font=\fsCell\selectfont, color=navy] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
   \or
     \draw[fill=navyramp2, draw=white, line width=1.0pt] (\cx,\cy) rectangle ++(\cellW-0.05,-(\cellH-0.05));
-    \node[font=\fsSmall\selectfont, color=navy] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
+    \node[font=\fsCell\selectfont, color=navy] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
   \or
     \draw[fill=navyramp3, draw=white, line width=1.0pt] (\cx,\cy) rectangle ++(\cellW-0.05,-(\cellH-0.05));
-    \node[font=\fsSmall\selectfont, color=white] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
+    \node[font=\fsCell\selectfont, color=white] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
   \or
     \draw[fill=navyramp4, draw=white, line width=1.0pt] (\cx,\cy) rectangle ++(\cellW-0.05,-(\cellH-0.05));
-    \node[font=\fsSmall\selectfont, color=white] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
+    \node[font=\fsCell\selectfont, color=white] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
   \or
     \draw[fill=navyramp5, draw=white, line width=1.0pt] (\cx,\cy) rectangle ++(\cellW-0.05,-(\cellH-0.05));
-    \node[font=\fsSmall\selectfont, color=white] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
+    \node[font=\fsCell\selectfont, color=white] at (\cx+0.5*\cellW-0.025,\cy-0.5*\cellH+0.025) {#5};
   \fi
 }
 
@@ -82,12 +85,13 @@
 
 %% ================= Shared ramp legend (pale -> dark) =================
 \newcommand{\hramp}[1]{%
-  \node[font=\fsSmall\selectfont, color=muted, anchor=east] at (#1-0.15,-4.98) {low};
+  \node[font=\fsSmall\selectfont, color=muted, anchor=east] at (#1-0.15,-5.62) {low};
   \foreach \i/\col in {0/navyramp1,1/navyramp2,2/navyramp3,3/navyramp4,4/navyramp5} {
-    \draw[fill=\col, draw=white, line width=0.6pt] ({#1+\i*0.42},-5.14) rectangle ++(0.38,-0.32);
+    \draw[fill=\col, draw=white, line width=0.6pt] ({#1+\i*0.42},-5.78) rectangle ++(0.38,-0.32);
   }
-  \node[font=\fsSmall\selectfont, color=muted, anchor=west] at (#1+5*0.42+0.15,-4.98) {high};
+  \node[font=\fsSmall\selectfont, color=muted, anchor=west] at (#1+5*0.42+0.15,-5.62) {high};
 }
-\hramp{\labelW}
-\hramp{\xR+\labelW}
+% one shared ramp, centred under both panels: the two ramps were identical
+% (each scaled within its own metric), so a second copy carried no information.
+\hramp{11.3}
 \end{tikzpicture}
