@@ -219,6 +219,20 @@ if ($null -eq $renderPng) {
 Remove-Item "check_render-*.png" -ErrorAction SilentlyContinue
 
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# 7b. Content sits inside the TrimBox with >=5mm clearance on all four sides.
+#     Added after the footer was found sitting ENTIRELY below the trim line --
+#     the fixed-height content frame used inner position [t], which appends
+#     \vss (infinitely shrinkable glue), so the overflow never raised a warning.
+# ---------------------------------------------------------------------------
+$marginOut = & python check_margins.py $PdfFile 2>&1
+$marginOut | ForEach-Object { Write-Host $_ }
+if ($LASTEXITCODE -ne 0) {
+    Fail "Content does not clear the trim box by >=5mm on all sides"
+} else {
+    Pass "Content inside TrimBox with >=5mm clearance on all four sides"
+}
+
 # 8. Minimum rendered text size (report only; flag if below ~24pt)
 # ---------------------------------------------------------------------------
 $texText = Get-Content $TexFile -Raw

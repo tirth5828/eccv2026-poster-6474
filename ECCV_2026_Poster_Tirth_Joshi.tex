@@ -23,7 +23,7 @@
 \usepgfplotslibrary{groupplots}
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{0.07in}
+\setlength{\parskip}{0.05in}
 
 % ---------- TrimBox / BleedBox (PDF units = points, 1mm = 72/25.4pt) ----------
 % Media: 4053.5433 x 2919.6850 pt (1430x1030mm)
@@ -65,7 +65,7 @@
 \newcommand{\fsTitle}{\fontsize{75}{82}}  % main poster title only
 \newcommand{\fsHone}{\fontsize{40}{47}}   % subtitle, section-10 box headings
 \newcommand{\fsHtwo}{\fontsize{30}{36}}   % section tab titles, author line
-\newcommand{\fsBody}{\fontsize{25}{30}}   % all body text, banner text, affiliation, section-10 box bodies
+\newcommand{\fsBody}{\fontsize{25}{29}}   % all body text, banner text, affiliation, section-10 box bodies
 \newcommand{\fsSmall}{\fontsize{20}{24}}  % tables, captions, diagram labels, footer secondary text
 % Legacy macro names kept as aliases onto the 5-step scale so no call site breaks.
 \newcommand{\titlefont}{\fsTitle\bfseries\selectfont}
@@ -108,7 +108,7 @@
   \draw (1415mm,1030mm) -- (1415mm,1025mm);
 \end{tikzpicture}
 \bodyfont
-\begin{minipage}[t][\textheight][t]{\textwidth}
+\begin{minipage}[t]{\textwidth}
 
 % ---------- Header ----------
 \begin{minipage}[c]{0.105\textwidth}
@@ -116,7 +116,7 @@
 % ECCV 2026 Malmo skyline logo (organizers "Color Logos" pack). White box with a
 % navy rule, mirroring the Katz logo treatment on the right so the header is
 % symmetric. Placed at 4.4in = 387 DPI, well above the printer 100 DPI floor.
-\begin{tcolorbox}[width=4.98in,height=2.6in,colback=white,colframe=white,boxrule=0pt,arc=0.192in,halign=center,valign=center]
+\begin{tcolorbox}[width=4.98in,height=2.15in,colback=white,colframe=white,boxrule=0pt,arc=0.192in,halign=center,valign=center]
 \typeout{POSTER-CHECK: eccv-logo placed-width-pt=[\the\dimexpr 4.4in\relax]}%
 \includegraphics[width=4.4in]{assets/eccv-logo-cmyk.pdf}
 \end{tcolorbox}
@@ -125,16 +125,16 @@
   \centering
   {\titlefont\color{navy} Compositional Non-Face Re-Identification Pressure} \\
   {\titlefont\color{navy} under Cumulative Vision Releases}\par
-  \vspace{0.15in}
+  \vspace{0.08in}
   {\subtitlefont\color{navy2} Auditing the ``leaky bucket'' effect in vision benchmarks}\par
-  \vspace{0.2in}
+  \vspace{0.10in}
   {\authorfont Tirth Joshi \;\textcolor{muted}{\textbullet}\; Honggang Wang$^{\ast}$} \\
   {\affilfont\color{graytext}Katz School of Science and Health, Yeshiva University, New York, USA}\par
   {\affilfont\texttt{tjoshi1@mail.yu.edu} \quad \texttt{honggang.wang@yu.edu}}
 \end{minipage}\hfill
 \begin{minipage}[c]{0.13\textwidth}
   \raggedleft
-  \begin{tcolorbox}[width=4.98in,height=2.6in,colback=white,colframe=white,boxrule=0pt,arc=0.192in,halign=center,valign=center]
+  \begin{tcolorbox}[width=4.98in,height=2.15in,colback=white,colframe=white,boxrule=0pt,arc=0.192in,halign=center,valign=center]
   \typeout{POSTER-CHECK: katz-logo placed-width-pt=[\the\dimexpr 4.4in\relax]}%
   \includegraphics[width=4.4in]{assets/katz-logo-cmyk.pdf}
   \end{tcolorbox}
@@ -146,7 +146,7 @@
 \fsBody\selectfont
 \textbf{Main message.} Removing faces does not make identity risk ``reset'' with each new release. Dataset expansions, checkpoints, embeddings, indices, and metadata accumulate as side information. We define \textbf{$vRPI_\alpha$}, prove that true-posterior pressure is non-decreasing under added releases, and show large empirical pressure growth on face-masked Re-ID benchmarks.
 \end{claimbox}
-\vspace{0.13in}
+\vspace{0.05in}
 
 % ---------- Main 3-column grid ----------
 \begin{minipage}[t]{0.292\textwidth}
@@ -207,7 +207,7 @@ P_{\mathrm{guess}}(U\mid Z_{1:T})
 {\captionfont Sketch of $\Pr(U\mid Z_{1:t})$ concentrating across releases -- bars are illustrative, not measured. Measured $P_{\mathrm{guess}}$ is printed below each panel (Table, \S4).}
 \end{sectionbox}
 
-\vspace{0.13in}
+\vspace{0.09in}
 \begin{sectionbox}{2. Release-as-Channel Formulation}
 \centering
 \begin{tikzpicture}[x=1.2in,y=1.2in,>=Latex, every node/.style={font=\fsSmall\selectfont}]
@@ -227,7 +227,7 @@ P_{\mathrm{guess}}(U\mid Z_{1:T})
 {\captionfont Each disclosure is modeled as a channel $Z_t\sim K_t(\cdot\mid\widetilde X)$. The framework is release-sequence aware rather than tied to one Re-ID model or anonymizer.}
 \end{sectionbox}
 
-\vspace{0.13in}
+\vspace{0.09in}
 \begin{sectionbox}{3. $vRPI_\alpha$: Metric and Core Theory}
 \smallbody
 \mhead{Rényi pressure index.} For $\alpha>1$, using Arimoto conditional Rényi entropy,
@@ -328,7 +328,7 @@ R4 & A0-Graph & .7366 & 5.6697 & kNN-graph pathway\\
 {\captionfont Mean over 3 seeds. A3 independently shows the same R1$\rightarrow$R2 pattern ($P_{\mathrm{guess}}$: .407$\rightarrow$.706; $vRPI_2$: 4.723$\rightarrow$5.940). Empirical plug-in estimates can fluctuate with attacker/calibration even though Theorem 1 is a true-posterior statement.}
 \end{sectionbox}
 
-\vspace{0.13in}
+\vspace{0.09in}
 \begin{sectionbox}{5. Release Trend: The R1$\rightarrow$R2 Jump Dominates}
 \centering
 \typeout{POSTER-CHECK: fig-release-trends placed-linewidth-pt=[\the\linewidth]}%
@@ -338,7 +338,7 @@ R4 & A0-Graph & .7366 & 5.6697 & kNN-graph pathway\\
 {\captionfont Darker = higher (ramp scaled independently per metric). Blank cells mean no value is reported in the paper for that attacker/stage, not zero. The exposure expansion is the clearest compositional effect; R2$\rightarrow$R3 stays in the same dark band under validation-tuned fusion and temperature scaling; R4 demonstrates artifact-specific leakage through the prototype/index specialist and graph-exploiting attacker.}
 \end{sectionbox}
 
-\vspace{0.13in}
+\vspace{0.09in}
 \begin{sectionbox}{6. Replication + Non-Face Stress Test}
 \centering
 \typeout{POSTER-CHECK: fig-replication placed-linewidth-pt=[\the\linewidth]}%
@@ -410,7 +410,7 @@ R4 & A0-Graph & .7366 & 5.6697 & kNN-graph pathway\\
 {\captionfont Every attacker maps scores into a posterior over the same identity universe before entropy computation.}
 \end{sectionbox}
 
-\vspace{0.13in}
+\vspace{0.09in}
 \begin{sectionbox}{8. Diagnostics: Dependence, Calibration, Priors}
 \smallbody\linespread{1.12}\selectfont
 \mhead{Dependence overlap.} Conditional independence gives an ideal additive benchmark, not a claim about real CV releases. On Market,
@@ -429,7 +429,7 @@ quantifying redundancy among correlated release channels.
 \mhead{Non-uniform identity priors.} For a Zipf$(s)$ prior, normalizing by prior entropy instead of $\log N$, the R1$\rightarrow$R2 increment shrinks from $3.818$ at $s=0$ to $.123$ at $s=1.5$: a concentrated prior leaves less anonymity to erode.
 \end{sectionbox}
 
-\vspace{0.13in}
+\vspace{0.09in}
 \begin{sectionbox}{9. What the Framework Adds}
 \smallbody\linespread{1.12}\selectfont
 \mhead{Not another Re-ID model.} $vRPI_\alpha$ audits release-induced privacy pressure; rank/mAP remains a retrieval-utility metric -- different questions.
@@ -474,36 +474,34 @@ DP / attribute inference & Worst-case stability / bound & Via composition\\
 
 \end{minipage}
 
-\vspace{0.15in}
+\vspace{0.04in}
 \begin{sectionbox}{10. Final Contribution, Empirical Signal, and Limitation}
 \begin{minipage}[t]{0.318\linewidth}
-\begin{tcolorbox}[height=2.6in,colback=lightblue,colframe=navy2,left=0.168in,right=0.168in,top=0.144in,bottom=0.12in]
-{\fsHone\bfseries\color{navy}Contribution}\par\vspace{0.1in}
+\begin{tcolorbox}[colback=lightblue,colframe=navy2,left=0.168in,right=0.168in,top=0.144in,bottom=0.12in]
+{\fsHone\bfseries\color{navy}Contribution}\par\vspace{0.05in}
 {\fsBody\selectfont
-A \textbf{release-sequence privacy formalism}, $vRPI_\alpha$, from Arimoto conditional Rényi entropy.\par\vspace{0.15in}
+A \textbf{release-sequence privacy formalism}, $vRPI_\alpha$, from Arimoto conditional Rényi entropy.\par\vspace{0.07in}
 \textbf{Theory:} monotonicity under added side information, a Bayes-guessing bridge, an additive benchmark, ablation monotonicity, and plug-in stability.}
 \end{tcolorbox}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.318\linewidth}
-\begin{tcolorbox}[height=2.6in,colback=softgreen,colframe=green,left=0.168in,right=0.168in,top=0.144in,bottom=0.12in]
-{\fsHone\bfseries\color{navy}Empirical signal}\par\vspace{0.1in}
+\begin{tcolorbox}[colback=softgreen,colframe=green,left=0.168in,right=0.168in,top=0.144in,bottom=0.12in]
+{\fsHone\bfseries\color{navy}Empirical signal}\par\vspace{0.05in}
 {\fsBody\selectfont
-On face-masked Market-1501, \textbf{exposure expansion dominates}: A0 $P_{\mathrm{guess}}$ .288$\rightarrow$.749, $vRPI_2$ 4.332$\rightarrow$6.212.\par\vspace{0.15in}
+On face-masked Market-1501, \textbf{exposure expansion dominates}: A0 $P_{\mathrm{guess}}$ .288$\rightarrow$.749, $vRPI_2$ 4.332$\rightarrow$6.212.\par\vspace{0.07in}
 CUHK03 preserves the paired R1$\rightarrow$R2 direction; prototype/index and kNN-graph releases add artifact-specific leakage.}
 \end{tcolorbox}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.318\linewidth}
-\begin{tcolorbox}[height=2.6in,colback=softorange,colframe=orange,left=0.168in,right=0.168in,top=0.144in,bottom=0.12in]
-{\fsHone\bfseries\color{navy}Limitation}\par\vspace{0.1in}
+\begin{tcolorbox}[colback=softorange,colframe=orange,left=0.168in,right=0.168in,top=0.144in,bottom=0.12in]
+{\fsHone\bfseries\color{navy}Limitation}\par\vspace{0.05in}
 {\fsBody\selectfont
-Evaluation is theory-aligned and closed-world. $vRPI_\alpha$ is an \textbf{audit statistic, not a mitigation}.\par\vspace{0.15in}
+Evaluation is theory-aligned and closed-world. $vRPI_\alpha$ is an \textbf{audit statistic, not a mitigation}.\par\vspace{0.07in}
 Next: \textbf{open-set posteriors, realistic anonymizers, more datasets/video, and longer real release sequences.}}
 \end{tcolorbox}
 \end{minipage}
 \end{sectionbox}
 
-\vfill
-\vspace{0.06in}
 \begin{tcolorbox}[enhanced,colback=navy,colframe=navy,boxrule=0pt,arc=0in,outer arc=0in,left=0.264in,right=0.264in,top=0.03in,bottom=0.03in]
 \begin{minipage}[c]{0.30\textwidth}
   {\fsBody\bfseries\color{white} Tirth Joshi \;\textcolor{lineblue}{\textbullet}\; Honggang Wang} \\
